@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BECOME AWARE</title>
+  <style>
+    :root {
+      color-scheme:dark; --ink:#080b12; --coral:#e24853; --blue:#182b50; --paper:#11131b;
+      --line:#432a35; --text:#eee7e9; --muted:#ad9fa5; --terminal:#0b1320; --surface:#1a171d;
+    }
+    * { box-sizing:border-box; }
+    html, body { width:100%; height:100%; overflow:hidden; overscroll-behavior:none; }
+    body {
+      margin:0; min-height:100vh; color:var(--text); font-family:"Trebuchet MS", sans-serif;
+      background-color:#08090e;
+      background-image:linear-gradient(rgba(118,39,52,.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(118,39,52,.07) 1px, transparent 1px),
+        radial-gradient(ellipse at 50% 110%, rgba(108,20,37,.3), transparent 60%);
+      background-size:48px 48px, 48px 48px, 100% 100%;
+    }
+    #app {
+      width:min(680px, 100%); height:100vh; height:100svh; margin:0 auto; display:flex;
+      position:relative; isolation:isolate; flex-direction:column; background:#10121a;
+      border:3px solid #34232b; box-shadow:0 18px 56px rgba(0,0,0,.62); overflow:hidden; display:none;
+    }
+    #app.app-active { display:flex; }
+    #welcome-screen {
+      position:fixed; inset:0; z-index:2000; display:grid; place-items:center; padding:24px;
+      overflow:hidden; isolation:isolate; color:#f1e8e9; text-align:center; background:#09070b;
+      background-image:radial-gradient(ellipse at 50% 110%, rgba(117,24,39,.48), transparent 66%),
+        linear-gradient(135deg, #09070b 0%, #171019 52%, #08090d 100%);
+    }
+    #welcome-screen::before {
+      content:""; position:absolute; inset:0; z-index:0; pointer-events:none; opacity:.42;
+      background:repeating-linear-gradient(0deg, transparent 0 3px, rgba(241,232,233,.08) 3px 4px),
+        linear-gradient(90deg, transparent 0 49.8%, rgba(227,76,88,.13) 50%, transparent 50.2%);
+    }
+    #welcome-screen::after {
+      content:""; position:absolute; z-index:0; top:-20%; left:0; width:100%; height:16%; pointer-events:none;
+      background:linear-gradient(transparent, rgba(220,51,67,.22), rgba(220,51,67,.05), transparent);
+      animation:accueilBalayage 7s linear infinite;
+    }
+    .signal-messages {
+      position:absolute; inset:0; z-index:2; overflow:hidden; pointer-events:none;
+    }
+    .signal-message {
+      position:absolute; max-width:34vw; padding:9px 11px; border-left:3px solid #a8313e;
+      color:#ff858c; background:rgba(22,8,13,.68); font:700 1.1rem/1.3 Consolas, "Courier New", monospace;
+      text-align:left; overflow-wrap:anywhere; opacity:0; text-shadow:0 0 10px rgba(227,76,88,.35);
+      animation:messageParasite 8s ease-in-out infinite;
+    }
+    .signal-message:nth-child(1) { top:3%; left:3%; --dx:4vw; --dy:1.5vh; animation-delay:.1s; }
+    .signal-message:nth-child(2) { top:3%; right:3%; --dx:-4vw; --dy:1.5vh; animation-delay:.9s; }
+    .signal-message:nth-child(3) { top:9%; left:3%; --dx:5vw; --dy:-1vh; animation-delay:1.7s; }
+    .signal-message:nth-child(4) { top:9%; right:3%; --dx:-5vw; --dy:-1vh; animation-delay:2.5s; }
+    .signal-message:nth-child(5) { bottom:10%; left:3%; --dx:4vw; --dy:-1.5vh; animation-delay:3.3s; }
+    .signal-message:nth-child(6) { bottom:10%; right:3%; --dx:-4vw; --dy:-1.5vh; animation-delay:4.1s; }
+    .signal-message:nth-child(7) { bottom:3%; left:36%; --dx:3vw; --dy:-1vh; animation-delay:4.9s; }
+    @keyframes messageParasite {
+      0%, 7%, 100% { opacity:0; transform:translate(0,0); }
+      12%, 30% { opacity:.82; transform:translate(0,0); }
+      46% { opacity:.7; transform:translate(var(--dx), var(--dy)); }
+      58% { opacity:0; transform:translate(var(--dx), var(--dy)); }
+    }
+    .welcome-content { position:relative; z-index:1; width:min(760px, 100%); padding:24px 12px; animation:apparait .6s ease-out both; }
+    @media (max-width:540px) {
+      .signal-message { max-width:44vw; padding:6px 7px; font-size:.78rem; }
+      .signal-message:nth-child(1) { top:2%; left:3%; --dx:0px; --dy:1vh; }
+      .signal-message:nth-child(2) { top:2%; right:3%; --dx:0px; --dy:1vh; }
+      .signal-message:nth-child(3) { top:8%; left:3%; --dx:0px; --dy:-1vh; }
+      .signal-message:nth-child(4) { top:8%; right:3%; --dx:0px; --dy:-1vh; }
+      .signal-message:nth-child(5) { bottom:10%; left:3%; --dx:0px; --dy:-1vh; }
+      .signal-message:nth-child(6) { bottom:10%; right:3%; --dx:0px; --dy:-1vh; }
+      .signal-message:nth-child(7) { top:auto; bottom:2%; left:30%; --dx:0px; --dy:-1vh; }
+    }
+    @media (max-height:700px) {
+      .signal-message { font-size:.65rem; padding:4px 5px; }
+    }
+    .welcome-mark { margin:0 0 18px; color:#d5a5a9; font-family:Consolas, "Courier New", monospace; font-size:.8rem; font-weight:bold; text-transform:uppercase; }
+    .welcome-title {
+      margin:0; color:var(--coral); font-family:Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+      position:relative; font-size:clamp(2.7rem, 8vh, 5rem); line-height:.95; text-transform:uppercase;
+      text-shadow:3px 3px 0 #561421, 6px 6px 0 #020204; animation:titrePerturbe 3.6s steps(1, end) infinite;
+    }
+    .welcome-title::before, .welcome-title::after, #countdown-number::before, #countdown-number::after {
+      content:""; position:absolute; inset:0; pointer-events:none; opacity:0; mix-blend-mode:screen;
+    }
+    .welcome-title::before, #countdown-number::before {
+      background:linear-gradient(transparent 34%, rgba(255,95,108,.8) 34% 40%, transparent 40%);
+      clip-path:inset(0 0 52% 0); animation:decalageHaut 3.6s steps(1, end) infinite;
+    }
+    .welcome-title::after, #countdown-number::after {
+      background:linear-gradient(transparent 66%, rgba(255,94,99,.8) 66% 73%, transparent 73%);
+      clip-path:inset(50% 0 0 0); animation:decalageBas 3.6s steps(1, end) infinite;
+    }
+    .welcome-tagline { max-width:540px; margin:20px auto 18px; color:#f1e8e9; font-size:1.2rem; font-weight:bold; line-height:1.45; text-shadow:0 2px 12px #080609; }
+    .welcome-countdown { margin:0 auto 20px; font-family:Consolas, "Courier New", monospace; }
+    #countdown-label { color:#dda5aa; font-size:.72rem; font-weight:bold; letter-spacing:.12em; }
+    #countdown-number {
+      position:relative; width:max-content; margin:6px auto 2px; color:#ff626d;
+      font-size:3.5rem; font-weight:bold; line-height:1; font-variant-numeric:tabular-nums;
+      text-shadow:3px 0 #5e1727, -3px 0 #2a1019, 0 0 24px rgba(220,51,67,.45);
+    }
+    #countdown-status { color:#d8979e; font-size:.72rem; }
+    #language-switch { display:inline-flex; margin-bottom:18px; border:2px solid #78404a; }
+    #language-switch button {
+      min-width:112px; padding:9px 14px; border:0; background:#171018; color:#f1e8e9;
+      font:inherit; font-weight:bold; cursor:pointer;
+    }
+    #language-switch button + button { border-left:2px solid #78404a; }
+    #language-switch button[aria-pressed="true"] { background:#7d202e; color:#fff; }
+    #start-button {
+      display:block; min-width:220px; min-height:50px; margin:0 auto; padding:12px 24px;
+      border:2px solid #8e333e; border-radius:5px; background:#b63141; color:#fff6f1;
+      font:inherit; font-size:1rem; font-weight:bold; box-shadow:0 5px 0 #2a1018; cursor:pointer;
+    }
+    #start-button:hover { background:#d14855; transform:translateY(-2px); box-shadow:0 7px 0 #2a1018; }
+    #start-button:focus-visible, #language-switch button:focus-visible { outline:3px solid var(--coral); outline-offset:3px; }
+
+    #welcome-screen {
+      display:grid; place-items:center start; padding:24px 8%; text-align:left;
+      background:#08090b; background-image:none; overflow:auto;
+    }
+    #welcome-screen::before {
+      inset:0; opacity:1; background:url("Images/accueil-surveillance.jpg") center center / cover no-repeat;
+      filter:none;
+    }
+    #welcome-screen::after {
+      inset:0; width:auto; height:auto; animation:none;
+      background:linear-gradient(90deg, rgba(6,9,13,.9) 0%, rgba(6,9,13,.75) 25%, rgba(6,9,13,.12) 60%, rgba(6,9,13,.06) 100%),
+        linear-gradient(0deg, rgba(6,9,13,.42), transparent 32%);
+    }
+    .welcome-content { width:min(440px, 100%); padding:24px 0; }
+    .welcome-mark { color:#e87579; font-size:.72rem; margin-bottom:18px; }
+    .welcome-title { color:#e4f2f7; font-family:"Segoe UI", "Trebuchet MS", sans-serif; font-size:3.4rem; font-weight:800; line-height:1; text-shadow:0 2px 0 #49616d, 0 8px 20px rgba(0,0,0,.8); }
+    .welcome-tagline { margin:18px 0 30px; color:#e1e9eb; font-size:1.05rem; font-weight:normal; }
+    .welcome-countdown { margin:0 0 30px; padding-left:14px; border-left:2px solid #b73746; }
+    #countdown-label, #countdown-status { color:#c8b7b7; font-size:.7rem; }
+    #countdown-number { margin:7px 0; color:#f1ebea; font-size:2.6rem; text-shadow:2px 0 #a92c3b; }
+    #language-switch { margin-bottom:18px; border:1px solid #797b7c; }
+    #language-switch button { min-width:105px; background:rgba(12,13,16,.84); color:#ededeb; }
+    #language-switch button + button { border-left:1px solid #797b7c; }
+    #language-switch button[aria-pressed="true"] { background:#8d2431; }
+    #start-button { margin:0; width:220px; border:1px solid #c0b9b8; border-left:4px solid #d34450; border-radius:2px; background:rgba(71,13,24,.88); box-shadow:none; text-align:left; text-transform:uppercase; }
+    #start-button:hover { background:#a52e3d; transform:translateX(4px); box-shadow:none; }
+    @media (min-width:721px) {
+      .signal-message:nth-child(1) { left:55%; top:4%; }
+      .signal-message:nth-child(2) { right:3%; top:14%; }
+      .signal-message:nth-child(3) { left:64%; top:28%; }
+      .signal-message:nth-child(4) { right:3%; top:40%; }
+      .signal-message:nth-child(5) { left:58%; bottom:27%; }
+      .signal-message:nth-child(6) { right:3%; bottom:14%; }
+      .signal-message:nth-child(7) { left:53%; bottom:3%; }
+    }
+    @media (max-width:720px) {
+      #welcome-screen { padding:18px 7%; }
+      #welcome-screen::before { background-position:57% center; }
+      #welcome-screen::after { background:linear-gradient(90deg, rgba(7,8,11,.9), rgba(7,8,11,.48)), linear-gradient(0deg, rgba(7,8,11,.65), transparent 50%); }
+      .welcome-content { width:min(390px, 100%); padding:20px 0; }
+      .welcome-title { font-size:2.6rem; }
+      .welcome-tagline { margin:14px 0 22px; }
+      .welcome-countdown { margin-bottom:22px; }
+      .signal-message:nth-child(3), .signal-message:nth-child(4) { top:9%; }
+    }
+    @media (max-height:600px) {
+      #welcome-screen { align-items:start; }
+      .welcome-content { padding:10px 0; }
+      .welcome-mark { margin-bottom:10px; }
+      .welcome-title { font-size:2.5rem; }
+      .welcome-tagline { margin:10px 0 14px; }
+      .welcome-countdown { margin-bottom:14px; }
+      #countdown-number { font-size:2rem; }
+    }
+    #app::after {
+      content:""; position:absolute; inset:0; z-index:10; pointer-events:none; opacity:0;
+      background:repeating-linear-gradient(0deg, rgba(24,60,122,.18) 0 1px, transparent 1px 5px),
+        linear-gradient(90deg, rgba(242,79,80,.24), transparent 20% 80%, rgba(24,60,122,.24));
+    }
+    #app.erreur { background:#100b12; box-shadow:inset 0 0 100px rgba(106,12,31,.38), 0 18px 56px rgba(0,0,0,.62); }
+    #app.erreur header { background:#160b12; border-bottom-color:#782936; }
+    #app.erreur #chat { background-color:#10090e; }
+    #app.erreur #choix { background:#10090e; border-top-color:#782936; }
+    #app.erreur #jauge { background:#a92339; }
+    #app.erreur .post { border-color:#78313c; }
+    #app[data-niveau="1"] #chat { background-image:radial-gradient(ellipse at 75% 15%, rgba(116,28,45,.18), transparent 58%); }
+    #app[data-niveau="2"] #chat { background-image:radial-gradient(ellipse at 20% 12%, rgba(34,105,98,.14), transparent 58%); }
+    #app[data-niveau="3"] #chat { background-image:radial-gradient(ellipse at 78% 18%, rgba(72,105,145,.16), transparent 58%); }
+    #app[data-niveau="4"] #chat { background-image:radial-gradient(ellipse at 50% 5%, rgba(175,35,54,.22), transparent 62%); }
+    #app.glitching::after { animation:ecranGlitch .48s steps(2, end) both; }
+    #app.glitching .ligne.V:last-child .bulle { animation:bulleGlitch .48s steps(2, end) both; }
+    #demarrage {
+      position:fixed; inset:0; z-index:1000; display:grid; place-items:center; padding:24px;
+      overflow:hidden; background:#020509; color:#a0ffe8; font-family:Consolas, "Courier New", monospace;
+    }
+    #demarrage.termine { display:none; }
+    #demarrage::before {
+      content:""; position:absolute; inset:0; pointer-events:none; opacity:.42;
+      background:repeating-linear-gradient(0deg, transparent 0 3px, rgba(102,255,225,.12) 3px 4px);
+    }
+    #demarrage::after {
+      content:""; position:absolute; left:0; right:0; top:-15%; height:12%; pointer-events:none;
+      background:linear-gradient(transparent, rgba(24,60,122,.35), transparent); animation:balayage 1.7s linear 1 forwards;
+    }
+    #demarrage.sortie { animation:sortieDemarrage .28s ease-in forwards; }
+    #intertitre {
+      position:fixed; inset:0; z-index:3000; display:grid; place-items:center; padding:24px;
+      overflow:hidden; background:#050306; color:#f4e9ec; font-family:Consolas, "Courier New", monospace;
+    }
+    #intertitre.termine { display:none; }
+    #game-over { position:fixed; inset:0; z-index:4000; display:grid; place-items:center; padding:20px; background:rgba(3,4,8,.88); color:#f4e9ec; font-family:Consolas, "Courier New", monospace; }
+    #game-over[hidden] { display:none; }
+    .game-over-panel { width:min(440px, 100%); padding:28px; border:1px solid #a63748; border-top:4px solid #d34450; background:linear-gradient(145deg, #1a1118, #090a10); box-shadow:0 0 42px rgba(183,38,57,.28); text-align:center; }
+    .game-over-code { margin:0 0 12px; color:#db5967; font-size:.72rem; font-weight:bold; letter-spacing:.12em; }
+    .game-over-panel h2 { margin:0; color:#f4e9ec; font-size:clamp(1.7rem, 8vw, 2.4rem); line-height:1.05; text-shadow:3px 0 #78192c; }
+    .game-over-message { margin:12px 0 22px; color:#c7b7bd; font-size:.88rem; line-height:1.5; }
+    .game-over-actions { display:grid; gap:9px; }
+    .game-over-actions button { min-height:46px; padding:10px 14px; border:1px solid #84414d; border-left:4px solid #d34450; background:#28151c; color:#fff1f2; font:700 .88rem Consolas, "Courier New", monospace; cursor:pointer; }
+    .game-over-actions button:hover, .game-over-actions button:focus-visible { background:#54212b; outline:2px solid #f0828c; outline-offset:2px; }
+    #intertitre.actif { animation:intertitreEntree .22s steps(2, end) both; }
+    #intertitre::before {
+      content:""; position:absolute; inset:0; pointer-events:none; opacity:.5;
+      background:repeating-linear-gradient(0deg, transparent 0 3px, rgba(220,51,67,.12) 3px 4px),
+        radial-gradient(ellipse at center, rgba(88,10,26,.42), transparent 68%);
+    }
+    #intertitre::after {
+      content:""; position:absolute; top:-18%; left:0; width:100%; height:16%; pointer-events:none;
+      background:linear-gradient(transparent, rgba(218,44,65,.58), transparent); animation:intertitreBalayage 1.15s linear infinite;
+    }
+    .intertitre-cadre { position:relative; z-index:1; width:min(100%, 1100px); text-align:center; }
+    .intertitre-code { color:#b75060; font-size:.72rem; font-weight:bold; letter-spacing:.12em; }
+    .intertitre-titre { position:relative; margin:24px 0; display:grid; justify-items:center; gap:16px; }
+    .intertitre-majeur {
+      display:block; max-width:100%; color:#f4e9ec;
+      font:900 clamp(2.5rem, 11vw, 8rem)/.95 Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+      text-shadow:5px 0 #78192c, -5px 0 #18294c, 0 0 32px rgba(211,43,65,.5);
+      animation:intertitreTitre .38s steps(2, end) infinite;
+    }
+    .intertitre-niveau { display:block; color:#d49aa3; font:700 clamp(1.5rem, 4vw, 2.4rem)/1.1 Consolas, "Courier New", monospace; }
+    .intertitre-alerte { max-width:540px; margin:auto; color:#cd8d96; font-size:.84rem; line-height:1.55; }
+    .intertitre-bruit { position:absolute; inset:0; overflow:hidden; pointer-events:none; }
+    .intertitre-bruit span { position:absolute; color:#a84755; font-size:.68rem; opacity:.52; }
+    .intertitre-bruit span:nth-child(1) { top:15%; left:7%; }
+    .intertitre-bruit span:nth-child(2) { top:24%; right:6%; }
+    .intertitre-bruit span:nth-child(3) { bottom:19%; left:9%; }
+    .intertitre-bruit span:nth-child(4) { bottom:13%; right:7%; }
+    #intertitre.sortie { animation:intertitreSortie .32s ease-in forwards; }
+    .terminal { position:relative; width:min(740px, 100%); padding:24px; border-left:3px solid var(--blue); opacity:0; }
+    #demarrage.actif .terminal { animation:terminalApparait .2s ease-out forwards; }
+    .terminal-entete { display:flex; justify-content:space-between; gap:12px; color:#8c9ca3; font-size:.75rem; font-weight:bold; }
+    .terminal-signal { color:#f24f50; animation:signal 1.1s steps(2, end) 2; }
+    .terminal h2 { margin:22px 0 15px; color:#f24f50; font-size:1.65rem; line-height:1.1; text-shadow:2px 0 #183c7a; }
+    .terminal-lignes { display:grid; gap:7px; color:#a0ffe8; font-size:.9rem; }
+    .terminal-ligne { opacity:0; transform:translateX(-8px); }
+    #demarrage.actif .terminal-ligne { animation:ligneTerminal .22s ease-out forwards; }
+    #demarrage.actif .terminal-ligne:nth-child(1) { animation-delay:.1s; }
+    #demarrage.actif .terminal-ligne:nth-child(2) { animation-delay:.34s; }
+    #demarrage.actif .terminal-ligne:nth-child(3) { animation-delay:.58s; }
+    #demarrage.actif .terminal-ligne:nth-child(4) { animation-delay:.82s; }
+    .terminal-ligne span { color:#7f9298; }
+    .terminal-progression { margin-top:24px; color:#8c9ca3; font-size:.72rem; }
+    .terminal-piste { height:6px; margin-top:8px; background:#182126; }
+    .terminal-piste span { display:block; width:100%; height:100%; background:#183c7a; transform:scaleX(0); transform-origin:left; }
+    #demarrage.actif .terminal-piste span { animation:chargementTerminal 2.05s linear forwards; }
+    header { padding:14px 18px 10px; background:#090a0f; color:#f0e7e9; border-bottom:3px solid #1b1017; }
+    .console-strip {
+      min-height:28px; margin-bottom:11px; padding-bottom:8px; display:flex; align-items:center;
+      justify-content:space-between; gap:10px; border-bottom:1px solid #33242c;
+      color:#c3aeb4; font:700 .62rem Consolas, "Courier New", monospace;
+    }
+    .network-status { display:flex; align-items:center; gap:7px; color:#e25b68; }
+    .status-light { width:7px; height:7px; flex:none; border-radius:50%; background:#ae2639; box-shadow:0 0 8px rgba(174,38,57,.48); animation:signal 1.8s steps(2, end) infinite; }
+    header h1 {
+      margin:0 0 10px; color:var(--coral); font-family:Consolas, "Courier New", monospace;
+      font-size:1.15rem; line-height:1.2; text-transform:uppercase; text-shadow:none;
+    }
+    #vies { display:flex; gap:5px; margin:-2px 0 9px; color:#f05b6a; font-size:1.35rem; line-height:1; }
+    #vies .coeur-vide { color:#51414a; }
+    #jauge-fond, #timer-fond { height:12px; background:#090b11; border:2px solid #59404a; overflow:hidden; }
+    #jauge { height:100%; width:50%; background:#6b324c; transition:width .6s; }
+    #jauge-label { font-size:.75rem; font-weight:bold; margin:5px 0 8px; display:flex; justify-content:space-between; align-items:center; gap:8px; }
+    #info { color:#c3aeb8; font:700 .65rem Consolas, "Courier New", monospace; text-align:right; }
+    #progression { margin:2px 0 8px; }
+    #progression-meta { display:flex; justify-content:space-between; gap:10px; margin-bottom:5px; color:#bdaab1; font:700 .61rem Consolas, "Courier New", monospace; }
+    #progression-value { color:#f08a93; text-align:right; }
+    #progression-track { height:9px; overflow:hidden; border:1px solid #68404b; background:repeating-linear-gradient(90deg, #121016 0 calc(8.333% - 2px), #44303a calc(8.333% - 2px) 8.333%); }
+    #progression-fill { width:0; height:100%; background:linear-gradient(90deg, #8f2337, #e34e5b); box-shadow:0 0 12px rgba(227,78,91,.38); transition:width .5s ease; }
+    #timer-fond { height:9px; visibility:hidden; }
+    #timer { height:100%; width:100%; background:#d83d50; transition:width 1s linear; }
+
+    #chat {
+      position:relative; isolation:auto; flex:1; min-height:0; padding:16px;
+      overflow-y:auto; overscroll-behavior:contain; scrollbar-width:none;
+      display:flex; flex-direction:column; gap:12px;
+      background-color:#10121a; background-image:none; animation:none;
+    }
+    #chat { transition:background-color .55s ease, background-image .55s ease; }
+    #app[data-niveau="1"] #chat { background-color:#1a1117; background-image:radial-gradient(ellipse at 80% 10%, rgba(133,32,49,.16), transparent 55%); }
+    #app[data-niveau="2"] #chat { background-color:#10171a; background-image:radial-gradient(ellipse at 20% 12%, rgba(34,105,98,.16), transparent 58%); }
+    #app[data-niveau="3"] #chat { background-color:#10151d; background-image:radial-gradient(ellipse at 78% 18%, rgba(72,105,145,.19), transparent 58%); }
+    #app[data-niveau="4"] #chat { background-color:#160d13; background-image:radial-gradient(ellipse at 50% 5%, rgba(175,35,54,.24), transparent 62%); }
+    #chat::-webkit-scrollbar { display:none; }
+    .ligne { width:100%; margin:0; display:flex; align-items:flex-end; gap:8px; animation:apparait .3s ease-out both; }
+    .ligne.P { flex-direction:row-reverse; }
+    .avatar {
+      width:42px; height:42px; flex:none; overflow:hidden; display:flex; align-items:center; justify-content:center;
+      border:2px solid #4a303a; border-radius:50%; color:#eee7e9; font-size:1.15rem;
+      background:#19161d;
+    }
+    .avatar img { width:100%; height:100%; display:block; object-fit:cover; }
+    .V .avatar { background:#34131b; border-color:#78313d; }
+    .P .avatar { background:#172137; border-color:#374667; }
+    .bulle {
+      position:relative; flex:0 1 auto; min-height:0; max-width:78%; padding:10px 14px;
+      border:2px solid #47323a; border-radius:16px; line-height:1.4;
+      background:#1b1920; color:#f0e8e9; box-shadow:0 3px 0 rgba(0,0,0,.62);
+    }
+    .V .bulle { background:#28151c; border-color:#71303b; color:#f3dde0; border-bottom-left-radius:4px; }
+    .P .bulle { background:#141c2b; border-color:#394661; color:#e4e6ed; border-bottom-right-radius:4px; }
+    .narr {
+      width:100%; margin:2px auto; text-align:center; font:italic .9rem/1.45 "Trebuchet MS", sans-serif;
+      background:#191820; color:#d9d3dc; padding:10px 12px; border:2px solid #3a303c;
+      border-radius:10px; box-shadow:0 3px 0 rgba(0,0,0,.55); animation:apparait .3s ease-out both;
+    }
+    .narr::before { content:none; }
+
+    .post { position:relative; width:min(960px, 100%); margin-inline:auto; background:#1a171e; color:#efe7e9; border:2px solid #49303a; border-left:7px solid #9d3443; border-radius:14px; padding:16px; box-shadow:0 6px 0 rgba(0,0,0,.65); animation:captureFlux .46s cubic-bezier(.16,.8,.3,1) both; }
+    .post::before { content:none; }
+    .post-auteur { font:700 .82rem Consolas, "Courier New", monospace; color:#d28a98; margin-bottom:8px; }
+    .post-texte { line-height:1.45; }
+    .post-image { margin-top:10px; background:#11131a; border:1px solid #49303a; border-radius:9px; padding:30px 10px; text-align:center; font-size:.9rem; color:#d8cbd0; }
+    .post-video { display:block; width:100%; max-height:52vh; margin-top:12px; border:1px solid #49303a; border-radius:9px; background:#08090d; object-fit:contain; }
+    .post-image-photo { padding:0; background:transparent; border:0; }
+    .post-image-photo img { width:100%; height:auto; display:block; border-radius:7px; }
+    .decor { width:100%; margin:0 auto; overflow:hidden; border:2px solid #49303a; border-radius:14px; background:#17151b; box-shadow:0 6px 0 rgba(0,0,0,.62); animation:apparait .3s ease-out both; }
+    .decor img { width:100%; height:auto; display:block; }
+    .decor .legende { display:block; background:#17151b; color:#d8cbd0; font:700 .75rem "Trebuchet MS", sans-serif; padding:8px 12px; text-align:left; border-top:1px solid #49303a; }
+    .decor .legende::before { content:none; }
+    @keyframes apparait { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+    @keyframes entreeFlux { from { opacity:0; transform:translateX(-10px); filter:brightness(1.7); } 72% { opacity:1; transform:translateX(2px); } to { opacity:1; transform:none; filter:none; } }
+    @keyframes captureFlux { from { opacity:0; transform:translateY(10px) scale(.99); clip-path:inset(0 0 100%); } to { opacity:1; transform:none; clip-path:inset(0); } }
+    @keyframes fluxScan { to { background-position:0 12px; } }
+    @keyframes statutPulse { 50% { opacity:.42; box-shadow:0 0 2px rgba(255,89,100,.35); } }
+    @keyframes grilleReseau { to { background-position:52px 52px, 52px 52px, 0 0; } }
+    @keyframes ecranGlitch {
+      0%, 100% { opacity:0; clip-path:inset(0 0 100%); transform:translateX(0); }
+      15% { opacity:.9; clip-path:inset(12% 0 72%); transform:translateX(-4px); }
+      32% { opacity:.7; clip-path:inset(43% 0 46%); transform:translateX(4px); }
+      51% { opacity:.8; clip-path:inset(70% 0 20%); transform:translateX(-3px); }
+      72% { opacity:.6; clip-path:inset(28% 0 59%); transform:translateX(2px); }
+      88% { opacity:.5; clip-path:inset(84% 0 7%); transform:translateX(-2px); }
+    }
+    @keyframes bulleGlitch {
+      0%, 100% { transform:translateX(0); text-shadow:none; }
+      20% { transform:translateX(-3px); text-shadow:2px 0 var(--coral), -2px 0 var(--blue); }
+      44% { transform:translateX(3px); text-shadow:-2px 0 var(--coral), 2px 0 var(--blue); }
+      68% { transform:translateX(-1px); text-shadow:1px 0 var(--coral), -1px 0 var(--blue); }
+    }
+    @keyframes balayage { to { transform:translateY(110vh); } }
+    @keyframes terminalApparait { to { opacity:1; transform:translateY(0); } }
+    @keyframes ligneTerminal { to { opacity:1; transform:translateX(0); } }
+    @keyframes chargementTerminal { to { transform:scaleX(1); } }
+    @keyframes sortieDemarrage { to { opacity:0; visibility:hidden; } }
+    @keyframes intertitreEntree { 0% { opacity:0; filter:contrast(3); transform:translateX(-6px); } 45% { opacity:1; filter:contrast(1.7); transform:translateX(4px); } 100% { opacity:1; filter:none; transform:none; } }
+    @keyframes intertitreSortie { to { opacity:0; visibility:hidden; filter:blur(3px); } }
+    @keyframes intertitreBalayage { to { transform:translateY(112vh); } }
+    @keyframes intertitreTitre {
+      0%, 88%, 92%, 100% { transform:translateX(0) skewX(0); clip-path:inset(0); }
+      89% { transform:translateX(-5px) skewX(-2deg); clip-path:inset(12% 0 63%); }
+      90% { transform:translateX(4px) skewX(2deg); clip-path:inset(58% 0 18%); }
+      91% { transform:translateX(-2px); clip-path:inset(36% 0 42%); }
+    }
+    @keyframes signal { 50% { opacity:.35; } }
+    @keyframes accueilBalayage { to { transform:translateY(112vh); } }
+    @keyframes titrePerturbe {
+      0%, 16%, 21%, 66%, 71%, 100% { transform:translateX(0) skewX(0); }
+      17%, 67% { transform:translateX(-3px) skewX(-2deg); }
+      18%, 68% { transform:translateX(3px) skewX(2deg); }
+      19%, 69% { transform:translateX(-1px) skewX(0); }
+    }
+    @keyframes decalageHaut {
+      0%, 16%, 21%, 66%, 71%, 100% { opacity:0; transform:translate(0); }
+      17%, 67% { opacity:.8; transform:translate(-3px, -1px); }
+      18%, 68% { opacity:.65; transform:translate(3px, 1px); }
+      19%, 69% { opacity:.4; transform:translate(-1px, 0); }
+    }
+    @keyframes decalageBas {
+      0%, 16%, 21%, 66%, 71%, 100% { opacity:0; transform:translate(0); }
+      17%, 67% { opacity:.7; transform:translate(3px, 1px); }
+      18%, 68% { opacity:.8; transform:translate(-2px, -1px); }
+      19%, 69% { opacity:.4; transform:translate(1px, 0); }
+    }
+
+    @media (prefers-reduced-motion:reduce) {
+      #app.glitching::after, #app.glitching .ligne.V:last-child .bulle { animation:none; }
+      body, #chat, .ligne, .narr, .post, .decor, #choix button { animation:none; transition:none; }
+      .status-light { animation:none; }
+      .ligne.V.revelation .bulle::before, .ligne.V.revelation .avatar { animation:none; }
+      #welcome-screen::after, .welcome-title, .welcome-title::before, .welcome-title::after,
+      #countdown-number::before, #countdown-number::after { animation:none; }
+      .signal-message { animation:none; opacity:.42; transform:none; }
+      #demarrage::after, #demarrage.actif .terminal, #demarrage.actif .terminal-ligne,
+      #demarrage.actif .terminal-piste span, #demarrage.sortie, .terminal-signal { animation:none; }
+      #intertitre.actif, #intertitre::after, .intertitre-titre { animation:none; }
+      #intertitre.sortie { animation:none; opacity:0; visibility:hidden; }
+      #demarrage.actif .terminal, #demarrage.actif .terminal-ligne { opacity:1; transform:none; }
+      #demarrage.actif .terminal-piste span { transform:scaleX(1); }
+      #demarrage.sortie { opacity:0; visibility:hidden; }
+    }
+
+    #choix { padding:11px 18px 17px; background:#0b0c11; border-top:2px solid #3a2630; }
+    #choix button {
+      display:block; width:100%; min-height:46px; margin-top:8px; padding:10px 14px; font-size:.9rem;
+      font-family:"Trebuchet MS", sans-serif; font-weight:bold; text-align:center;
+      background:#24141c; color:#f1e8e9; border:2px solid #71313d; border-radius:18px;
+      box-shadow:0 4px 0 #08070a; cursor:pointer; transition:transform .16s, box-shadow .16s, background .16s;
+    }
+    #choix button:hover { background:#3a1c27; transform:translateY(-2px); box-shadow:0 6px 0 #08070a; }
+    #choix button.aide { background:#201b26; border-color:#554050; color:#e5dbe5; box-shadow:0 4px 0 #08070a; }
+    #choix button:focus-visible { outline:3px solid #dd6974; outline-offset:3px; }
+    #choix button:disabled { opacity:.48; cursor:default; transform:none; box-shadow:none; }
+
+    #app { border-color:#49353c; background:#0b0c10; box-shadow:0 20px 65px rgba(0,0,0,.65); }
+    #app header { background:#090a0d; border-bottom:1px solid #71333e; }
+    #app .console-strip { border-color:#402a31; color:#c8b7ba; }
+    #app header h1 { color:#f2e7e7; font-family:Consolas,"Courier New",monospace; font-weight:700; text-shadow:2px 0 #802431; }
+    #app #jauge-fond, #app #timer-fond { border:1px solid #654048; background:#100b0e; }
+    #app #jauge { background:#c14955; }
+    #app #progression-track { border-color:#654048; background:repeating-linear-gradient(90deg, #100b0e 0 calc(8.333% - 2px), #50313a calc(8.333% - 2px) 8.333%); }
+    #app #progression-fill { background:#c14955; box-shadow:0 0 10px rgba(193,73,85,.3); }
+    #app #progression-value, #app #info { color:#e0abb0; }
+    #app #chat { background-color:#111115; background-image:repeating-linear-gradient(0deg, rgba(191,79,91,.025) 0 1px, transparent 1px 5px), linear-gradient(90deg, rgba(117,46,57,.08), transparent 35%); background-size:auto; }
+    #app .bulle { border:1px solid #5b4449; border-radius:2px; background:#1c1b20; color:#f1eaeb; box-shadow:0 6px 18px rgba(0,0,0,.3); }
+    #app .V .bulle { border-left:3px solid #d05560; background:#29191d; }
+    #app .P .bulle { border-right:3px solid #9aadb8; background:#1c2226; }
+    #app .narr { border:1px solid #51474a; border-left:3px solid #92737a; border-radius:2px; background:#1b191c; color:#e2d9d9; box-shadow:none; }
+    #app .post { border:1px solid #67454d; border-left:4px solid #c14955; border-radius:2px; background:#1d181b; color:#f2e9e9; box-shadow:0 8px 20px rgba(0,0,0,.3); }
+    #app .post-auteur { color:#ef9ca4; }
+    #app .decor { border:1px solid #655056; border-radius:2px; box-shadow:none; }
+    #app .decor .legende { border-color:#655056; background:#211a1d; color:#eadbdb; }
+    #app #choix { background:#0c0b0d; border-top:1px solid #59333b; }
+    #app #choix button { border:1px solid #94505b; border-radius:2px; background:#35191f; color:#fff1f1; font-family:Consolas,"Courier New",monospace; text-align:left; box-shadow:inset 4px 0 #c14955; }
+    #app #choix button:hover { background:#58242d; box-shadow:inset 4px 0 #ef8891; }
+    #app #choix button.aide { border-color:#82706b; background:#302825; box-shadow:inset 4px 0 #c5a394; }
+    #app #choix button:disabled { opacity:.48; box-shadow:none; }
+    #app.erreur header { background:#160b12; border-bottom-color:#782936; }
+    #app.erreur #chat { background-color:#10090e; }
+    #app.erreur #choix { background:#10090e; border-top-color:#782936; }
+    #app.erreur #jauge { background:#c53b50; }
+
+    @media (min-width:720px) {
+      body { padding:20px 0; }
+      #app { height:calc(100vh - 40px); height:calc(100svh - 40px); }
+      header { padding:17px 22px 12px; }
+      #chat { padding:22px; }
+    }
+    @media (max-width:719px) {
+      body { padding:0; }
+      #app { width:100%; height:100vh; height:100dvh; border:0; box-shadow:none; }
+    }
+    @media (min-width:720px) and (orientation:landscape) {
+      body { padding:20px 24px; }
+      #app { width:min(1200px, 100%); height:calc(100vh - 40px); height:calc(100dvh - 40px); }
+      header {
+        display:grid; grid-template-columns:minmax(220px, .75fr) minmax(0, 1.25fr);
+        align-items:center; column-gap:26px;
+      }
+      .console-strip { grid-column:1 / -1; grid-row:1; width:100%; }
+      header h1 { grid-column:1; grid-row:2 / 6; margin:0; }
+      #jauge-fond { grid-column:2; grid-row:2; }
+      #jauge-label { grid-column:2; grid-row:3; }
+      #progression { grid-column:2; grid-row:4; }
+      #timer-fond { grid-column:2; grid-row:5; }
+      #chat { width:min(100%, 1000px); align-self:center; }
+      #choix { display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:8px 12px; }
+      #choix button { margin-top:0; }
+    }
+    @media (max-width:380px) {
+      header { padding:12px 13px 9px; }
+      header h1 { font-size:1.45rem; }
+      #chat { padding:13px; }
+      #choix { padding:9px 13px 13px; }
+    }
+  </style>
+</head>
+<body>
+  <main id="welcome-screen">
+    <div class="signal-messages" aria-hidden="true">
+      <span class="signal-message" data-fr="AIDEZ-NOUS" data-en="HELP US">AIDEZ-NOUS</span>
+      <span class="signal-message" data-fr="ILS NOUS ÉCOUTENT" data-en="THEY ARE LISTENING">ILS NOUS ÉCOUTENT</span>
+      <span class="signal-message" data-fr="NE COUPEZ PAS LE SIGNAL" data-en="DO NOT CUT THE SIGNAL">NE COUPEZ PAS LE SIGNAL</span>
+      <span class="signal-message" data-fr="LE DERNIER MESSAGE DATE DE 2100" data-en="LAST MESSAGE RECEIVED: 2100">LE DERNIER MESSAGE DATE DE 2100</span>
+      <span class="signal-message" data-fr="ON PENSAIT QUE C'ÉTAIT UNE BLAGUE" data-en="WE THOUGHT IT WAS A JOKE">ON PENSAIT QUE C'ÉTAIT UNE BLAGUE</span>
+      <span class="signal-message" data-fr="NE LES CROYEZ PAS" data-en="DO NOT BELIEVE THEM">NE LES CROYEZ PAS</span>
+      <span class="signal-message" data-fr="QUI A RÉPONDU À VOTRE PLACE ?" data-en="WHO ANSWERED IN YOUR PLACE?">QUI A RÉPONDU À VOTRE PLACE ?</span>
+    </div>
+    <div class="welcome-content">
+      <p class="welcome-mark">CANAL 07 // TRANSMISSION D'URGENCE</p>
+      <h1 class="welcome-title" id="welcome-title">BECOME AWARE</h1>
+      <p class="welcome-tagline" id="welcome-tagline">The future is in your hands</p>
+      <section class="welcome-countdown" aria-label="Compte à rebours vers 2100">
+        <div id="countdown-label">SIGNAL DE 2100 DANS</div>
+        <div id="countdown-number" data-glitch="00:03" aria-live="polite" aria-atomic="true">00:03</div>
+        <div id="countdown-status">TRANSMISSION EN APPROCHE // ANNÉE 2100</div>
+      </section>
+      <div id="language-switch" role="group" aria-label="Choix de la langue">
+        <button type="button" data-lang="fr" aria-pressed="true">Français</button>
+        <button type="button" data-lang="en" aria-pressed="false">English</button>
+      </div>
+      <button type="button" id="start-button">Commencer</button>
+    </div>
+  </main>
+  <div id="demarrage" class="termine" role="status" aria-live="polite" aria-label="Interception du partage">
+    <div class="terminal">
+      <div class="terminal-entete"><span>CANAL 07 // PARTAGE</span><span class="terminal-signal">SIGNAL INTERCEPTÉ</span></div>
+      <h2>Partage intercepté</h2>
+      <div class="terminal-lignes" aria-hidden="true">
+        <div class="terminal-ligne"><span>[ALERTE]</span> Envoi de la publication détecté...</div>
+        <div class="terminal-ligne"><span>[DÉTOURNEMENT]</span> Destination inconnue.</div>
+        <div class="terminal-ligne"><span>[SOURCE]</span> app://campus-inconnu</div>
+        <div class="terminal-ligne"><span>[ACCÈS]</span> Session verrouillée.</div>
+      </div>
+      <div class="terminal-progression">
+        <span>OUVERTURE DE LA PAGE...</span>
+        <div class="terminal-piste"><span></span></div>
+      </div>
+    </div>
+  </div>
+  <div id="intertitre" class="termine" role="status" aria-live="assertive" aria-label="Intertitre">
+    <div class="intertitre-bruit" aria-hidden="true">
+      <span>[SIGNAL LOST]</span><span>[DON'T TRUST THE FEED]</span>
+      <span>[SESSION STILL OPEN]</span><span>[WHO IS WATCHING?]</span>
+    </div>
+    <div class="intertitre-cadre">
+      <div class="intertitre-code" id="intertitre-code">PROTOCOLE D'APPRENTISSAGE</div>
+      <h2 class="intertitre-titre"><span class="intertitre-majeur" id="intertitre-titre">TUTORIEL</span><span class="intertitre-niveau" id="intertitre-niveau">NIVEAU 1</span></h2>
+      <p class="intertitre-alerte" id="intertitre-alerte">ANALYSE DE DÉSINFORMATION</p>
+    </div>
+  </div>
+  <div id="game-over" role="dialog" aria-modal="true" aria-labelledby="game-over-title" aria-describedby="game-over-message" hidden>
+    <div class="game-over-panel">
+      <p class="game-over-code" id="game-over-code">SIGNAL PERDU // VIES ÉPUISÉES</p>
+      <h2 id="game-over-title">GAME OVER</h2>
+      <p class="game-over-message" id="game-over-message">Tes trois vies sont épuisées.</p>
+      <div class="game-over-actions">
+        <button id="retry-level-button" type="button">Refaire le niveau</button>
+        <button id="restart-game-button" type="button">Recommencer le jeu</button>
+        <button id="home-button" type="button">Retourner à l'écran d'accueil</button>
+      </div>
+    </div>
+  </div>
+  <div id="app">
+    <header>
+      <div class="console-strip">
+        <span id="desk-label">VIGIE // CELLULE ANTI-INFOX</span>
+        <span class="network-status"><span class="status-light" aria-hidden="true"></span><span id="network-label">RÉSEAU COMPROMIS</span></span>
+      </div>
+      <h1 id="game-title">V // PIÈGE</h1>
+      <div id="vies" role="img" aria-label="Vies : 3 sur 3"><span class="coeur">♥</span><span class="coeur">♥</span><span class="coeur">♥</span></div>
+      <div id="jauge-fond"><div id="jauge"></div></div>
+      <div id="jauge-label">
+        <span><span id="critique-label">Esprit critique :</span> <span id="score">50</span>/100</span>
+        <span id="info"></span>
+      </div>
+      <div id="progression">
+        <div id="progression-meta"><span id="progression-label">RÉSISTANCE AUX INFOX</span><span id="progression-value">NIVEAU 1 / 4 · 0 / 12</span></div>
+        <div id="progression-track" role="progressbar" aria-label="Résistance à la désinformation" aria-valuemin="0" aria-valuemax="12" aria-valuenow="0" aria-valuetext="0 sur 12 réponses justes">
+          <div id="progression-fill"></div>
+        </div>
+      </div>
+      <div id="timer-fond"><div id="timer"></div></div>
+    </header>
+    <div id="chat"></div>
+    <div id="choix"></div>
+  </div>
+
+  <script>
+    let langue = new URLSearchParams(location.search).get("lang") === "en" ? "en" : "fr";
+    const traductionsEN = {
+      "Le Learning Center": "The Learning Center",
+      "Vidéo du post": "Post video",
+      "Une aprèm classique. Je suis assis(e) dans le canapé du Learning Center, mon café posé à côté, entre deux cours.": "An ordinary afternoon. I'm sitting on the sofa in the Learning Center, coffee beside me, between classes.",
+      "Je sors mon téléphone et je me mets à scroller, sans vraiment regarder.": "I take out my phone and start scrolling without really paying attention.",
+      "Scroller sur mon téléphone 📱": "Scroll on my phone 📱",
+      "Mon pouce fait défiler le fil d'actualité... jusqu'à ce qu'un visuel me fasse m'arrêter.": "My thumb scrolls through the feed until an image makes me stop.",
+      "LE CAFÉ DE RSB EST EN RÉALITÉ FABRIQUÉ À PARTIR DES EAUX USÉES DES TOILETTES !": "RSB'S COFFEE IS ACTUALLY MADE FROM TOILET WASTEWATER!",
+      "Photo d'un café étiqueté « Toilet Coffee », présenté comme préparé avec des eaux usées.": "Photo of a cup labeled 'Toilet Coffee,' presented as made from wastewater.",
+      "🖼️ [Visuel choc généré par IA]": "🖼️ [Shocking AI-generated image]",
+      "Photo d'un café étiqueté « Toilet Coffee », présenté comme préparé avec des eaux usées.": "Photo of a cup labeled 'Toilet Coffee,' presented as made from wastewater.",
+      "Attends... c'est quoi ce truc encore ?": "Wait... what is this now?",
+      "Non mais c'est n'importe quoi ! Je balance ça direct sur le groupe de la promo, ils vont halluciner.": "This is ridiculous! I'm sending it straight to the class group chat. They'll freak out.",
+      "Mon pouce s'arrête juste au-dessus du bouton « Partager ».": "My thumb hovers just above the Share button.",
+      "📲 Partager cette publication": "📲 Share this post",
+      "Sage décision. En prenant 5 secondes, tu remarques que l'image a une texture bizarre et que le texte sort de nulle part.": "Smart move. Taking five seconds, you notice the image looks strange and the claim has no source.",
+      "Ah ouais, bien vu... C'était gros comme une maison. J'ai failli passer pour un(e) idiot(e).": "Oh, good catch... It was obvious. I almost made a fool of myself.",
+      "Tu as évité le piège de justesse. Mais 90 % de ta promo n'aura pas ton réflexe.": "You barely avoided the trap. But 90% of your classmates won't think twice.",
+      "C'est quoi ce relou... un étudiant du campus qui a piraté mon compte ?": "Who is this creep... a student who hacked my account?",
+      "Un étudiant ? Je ne crois pas. Regarde plutôt l'écran de ton PC portable.": "A student? I don't think so. Look at your laptop screen instead.",
+      "Regarder le PC 💻": "Look at the laptop 💻",
+      "Le téléphone vibre violemment. Une page inconnue s'ouvre et verrouille l'écran.": "The phone vibrates violently. An unknown page opens and locks the screen.",
+      "Wow, tout doux ! Tu as pris 2 secondes pour vérifier si l'image était vraie, ou tu partages juste parce que ça te fait réagir ?": "Whoa, slow down! Did you take two seconds to check if the image was real, or are you sharing because it made you react?",
+      "📲 Partager sans vérifier": "📲 Share without checking",
+      "🔍 Prendre 30 secondes pour vérifier": "🔍 Take 30 seconds to check",
+      "NON ! Ne clique pas sur envoyer !": "NO! Don't hit send!",
+      "Si tu balances cette infox, tu ouvres la boîte de Pandore. Lâche ce téléphone !": "If you spread this fake, there's no taking it back. Put the phone down!",
+      "Puisque tu m'ignores sur ton téléphone, regarde l'écran de ton PC.": "Since you're ignoring me on your phone, look at your computer screen.",
+      "Trop tard, l'impulsion a failli l'emporter. Même si tu hésites maintenant, le visuel a déjà commencé à tourner sur les réseaux du campus.": "Too late. The urge almost won. Even if you hesitate now, the image has already started spreading across campus.",
+      "Regarde l'écran de ton PC portable. On a un problème plus urgent à régler.": "Look at your laptop screen. We have a more urgent problem.",
+      "L'écran du PC clignote. Toutes mes applis se ferment. Une fenêtre de visio s'ouvre : un visage avec un masque bizarre.": "The laptop screen flickers. All my apps close. A video call opens: a face wearing a strange mask.",
+      "Écoute. Je viens de 2100. En 2100, les États se sont écroulés sous le poids de la désinformation générée par IA. Ton post sur le café, c'est la première brique de cet effondrement.": "Listen. I'm from the year 2100. Governments collapsed under the weight of AI-generated disinformation. Your coffee post is the first brick in that collapse.",
+      "Tu as trop regardé de films de science-fiction. Tout le monde sait que c'est faux, non ?": "You've watched too many sci-fi movies. Everyone knows it's fake, right?",
+      "Ah oui ? « Tout le monde le sait » ? Clique sur l'outil d'analyse sur ton bureau. On va voir si tu es si calé(e) face à un algorithme.": "Oh really? Everyone knows? Open the analysis tool on your desktop. Let's see how well you can spot an algorithm's tricks.",
+      "Ouvrir l'outil d'analyse 🔎": "Open the analysis tool 🔎",
+      "Niveau 1 : Les évidences": "Level 1: The Obvious Ones",
+      "🥉 Œil de débutant": "🥉 Beginner's Eye",
+      "Je te montre trois posts. Pour chacun : vrai ou faux ?": "I'll show you three posts. For each one: true or false?",
+      "Tu peux me demander de l'aide, 3 fois maximum.": "You can ask me for help up to three times.",
+      "🚨 URGENT !!! La cafèt du campus met du produit nettoyant dans les cafés !!! PARTAGE AVANT QUE ÇA SOIT SUPPRIMÉ !!!": "🚨 URGENT!!! The campus cafe is putting cleaning products in coffee!!! SHARE BEFORE THIS GETS DELETED!!!",
+      "VIDÉO VIRALE : Donald Trump et Vladimir Poutine se lancent dans une chorégraphie improvisée. PARTAGEZ AVANT SUPPRESSION !": "VIRAL VIDEO: Donald Trump and Vladimir Putin break into an improvised dance. SHARE BEFORE IT'S DELETED!",
+      "Vidéo truquée montrant Donald Trump et Vladimir Poutine en train de danser.": "Manipulated video showing Donald Trump and Vladimir Putin dancing.",
+      "Sérieusement ? T'as déjà vu des chefs d'État danser comme ça ? C'est évidemment un deepfake.": "Seriously? Have you ever seen world leaders dance like that? It's obviously a deepfake.",
+      "Faux. Cette vidéo est un deepfake de Donald Trump et Vladimir Poutine. Des gestes ou des situations improbables peuvent être des indices, mais il faut aussi vérifier la source.": "False. This video is a deepfake of Donald Trump and Vladimir Putin. Unusual movements or situations can be clues, but always check the source too.",
+      "Compte anonyme, des majuscules partout, aucune source... et on te presse de partager.": "Anonymous account, all caps, no source... and it's rushing you to share.",
+      "Faux. Urgence + majuscules + « partage vite » : le but est de te faire réagir avant de réfléchir.": "False. Urgency + all caps + 'share now' are meant to make you react before you think.",
+      "Compte officiel de l'école ✔": "Official school account ✔",
+      "@people_flash": "@people_flash",
+      "RUMEUR : Brad Pitt serait hospitalisé. Une publication attribuée à Anne prétend révéler son état de santé. Cette photo prouve quelque chose ?": "RUMOR: Brad Pitt is reportedly in hospital. A post attributed to Anne claims to reveal his condition. Does this photo prove anything?",
+      "Photo présentée comme montrant Brad Pitt à l'hôpital, sans source vérifiable.": "Photo presented as showing Brad Pitt in hospital, with no verifiable source.",
+      "Tu crois vraiment qu'un acteur aussi fortuné que Brad Pitt aurait besoin qu'on lui paie son séjour à l'hôpital ? Ça ne prouve rien à elle seule : vérifie la source et qui est Anne.": "Do you really think an actor as wealthy as Brad Pitt would need someone to pay for his hospital stay? That alone proves nothing: check the source and who Anne is.",
+      "Le prénom « Anne » ne suffit pas à identifier une source. Vérifie le compte d'origine et cherche une confirmation auprès de médias fiables.": "The name 'Anne' isn't enough to identify a source. Check the original account and look for confirmation from reliable news outlets.",
+      "Faux. Cette image ne prouve pas l'hospitalisation de Brad Pitt ni qui l'aurait publiée. Un post sensationnel et une photo émouvante ne remplacent pas une source fiable.": "False. This image proves neither that Brad Pitt is in hospital nor who posted it. A sensational post and an emotional photo are no substitute for a reliable source.",
+      "Le Learning Center sera exceptionnellement fermé vendredi de 12h à 14h pour maintenance. Plus d'infos sur l'intranet.": "The Learning Center will be closed Friday from noon to 2 p.m. for maintenance. More information on the intranet.",
+      "Regarde l'auteur et le ton. Est-ce que ça cherche à te faire peur ?": "Look at who posted it and the tone. Is it trying to scare you?",
+      "Vrai. Compte officiel, ton neutre, et ça renvoie vers une source que tu peux vérifier.": "True. It's an official account, uses a neutral tone, and points to a source you can check.",
+      "Une étude prouve que boire 10 cafés par jour rend plus intelligent. Les profs vous le cachent !": "A study proves that drinking 10 coffees a day makes you smarter. Your teachers are hiding it!",
+      "Dix cafés par jour pour devenir plus intelligent ? Ça serait pratique. Mais si l'étude est introuvable, la promesse est facile à inventer.": "Ten coffees a day to get smarter? Handy. But if no one can find the study, the promise is easy to make up.",
+      "Quelle étude ? Qui l'a faite ? Et « on vous cache la vérité », ça sent le complot.": "What study? Who conducted it? 'They're hiding the truth' sounds like a conspiracy.",
+      "Faux. Aucune étude citée, et « on vous le cache » est une technique classique pour paraître détenir un secret.": "False. No study is cited, and 'they're hiding it' is a classic way to pretend you have secret knowledge.",
+      "En Corée du Nord, des dizaines de milliers de personnes forment une immense mosaïque représentant le président du pays.": "In North Korea, tens of thousands of people form a giant mosaic depicting the country's leader.",
+      "Une mosaïque géante représentant Kim Il-sung, composée de panneaux colorés présentés devant une foule.": "A giant mosaic of Kim Il-sung made from colorful panels displayed before a crowd.",
+      "Observe la foule et les panneaux colorés : le portrait est composé d'une multitude d'éléments coordonnés.": "Look at the crowd and colorful panels: the portrait is made from many coordinated elements.",
+      "Vrai. Lors de spectacles de masse en Corée du Nord, des milliers de participants coordonnent des panneaux colorés pour composer des images monumentales.": "True. At mass performances in North Korea, thousands of participants coordinate colorful panels to create monumental images.",
+      "Niveau 2 : Les imitations": "Level 2: The Impersonators",
+      "🥈 Éclaireur": "🥈 Scout",
+      "Pas mal ! Mais les vrais manipulateurs sont plus malins que ça.": "Not bad! But real manipulators are much more subtle.",
+      "Maintenant : 40 secondes par post, et je ne peux t'aider que 2 fois.": "Now you have 40 seconds per post, and I can only help twice.",
+      "VIDÉO INCROYABLE : des lapins font du trampoline dans la bibliothèque ! 😱": "UNBELIEVABLE VIDEO: rabbits are bouncing on a trampoline in the library! 😱",
+      "Vidéo de lapins qui sautent sur un trampoline.": "Video of rabbits jumping on a trampoline.",
+      "Observe bien les lapins : leurs mouvements, leurs contours et leurs ombres. Un détail peut trahir une vidéo truquée.": "Watch the rabbits closely: their movement, outlines, and shadows. A small detail can reveal a manipulated video.",
+      "Faux. Une vidéo peut sembler convaincante tout en étant truquée. Observe les mouvements et les détails, puis cherche la source originale.": "False. A video can look convincing and still be manipulated. Check the movement and details, then look for the original source.",
+      "BDE officiel ✔": "Official Student Union ✔",
+      "La soirée de rentrée est décalée à jeudi à cause de la grève des transports. Confirmé par la direction, détails sur l'intranet.": "The welcome party is moved to Thursday because of the transit strike. Confirmed by the administration; details on the intranet.",
+      "Un compte officiel, une info banale, une source. Rien d'alarmiste.": "An official account, ordinary news, and a source. Nothing alarming.",
+      "Vrai. Douter, ce n'est pas tout rejeter : ici, tout est cohérent et vérifiable.": "True. Being critical doesn't mean rejecting everything: this is consistent and verifiable.",
+      "Des images circulent en ligne et montreraient Donald Trump en train d'être arrêté. Que s'est-il vraiment passé ?": "Images circulating online appear to show Donald Trump being arrested. What really happened?",
+      "Image montrant Donald Trump entouré de policiers et semblant être arrêté.": "Image showing Donald Trump surrounded by police and apparently being arrested.",
+      "Cette image a été créée avec Midjourney, un outil d'intelligence artificielle. Vérifie si des sources fiables confirment l'arrestation.": "This image was created with Midjourney, an AI tool. Check whether reliable sources confirm the arrest.",
+      "Faux. Cette image générée avec Midjourney ne montre pas une arrestation réelle de Donald Trump.": "False. This image generated with Midjourney does not show a real arrest of Donald Trump.",
+      "Ce poisson des profondeurs possède une tête transparente qui laisse voir certains de ses organes.": "This deep-sea fish has a transparent head that reveals some of its organs.",
+      "Poisson des profondeurs avec une tête transparente, laissant apparaître ses organes internes.": "Deep-sea fish with a transparent head revealing its internal organs.",
+      "La tête transparente de ce poisson est une caractéristique réelle de certaines espèces des profondeurs.": "This fish's transparent head is a real feature of some deep-sea species.",
+      "Vrai. Il s'agit du poisson barreleye, une espèce réelle dont le dôme transparent laisse voir ses yeux à l'intérieur de la tête.": "True. This is a barreleye, a real species whose transparent dome reveals its eyes inside its head.",
+      "EXCLUSIF : les frais d'inscription vont tripler dès septembre, selon une source ministérielle anonyme.": "EXCLUSIVE: tuition fees will triple in September, according to an anonymous government source.",
+      "Regarde bien l'adresse du site. Est-ce vraiment le journal que tu connais ?": "Look closely at the website address. Is it really the news outlet you know?",
+      "Faux. Faux site qui imite un vrai média (le « .co »), et une source anonyme non confirmée ailleurs.": "False. A fake site imitating a real outlet, plus an anonymous source not confirmed elsewhere.",
+      "Niveau 3 : Les faux crédibles": "Level 3: Convincing Fakes",
+      "🥇 Détective": "🥇 Detective",
+      "Là, ça se corse : les faux semblent sérieux, et certains vrais semblent incroyables.": "Now it gets tricky: some fakes look convincing, and some true stories sound unbelievable.",
+      "25 secondes par post. Une seule aide.": "25 seconds per post. One hint only.",
+      "Une fillette en larmes serre son chiot sur une barque après le passage de l'ouragan Helene aux États-Unis.": "A tearful little girl clutches her puppy in a boat after Hurricane Helene in the United States.",
+      "Image présentée comme une photo d'une fillette en larmes tenant son chiot sur une barque après l'ouragan Helene.": "Image presented as a photo of a tearful girl holding her puppy in a boat after Hurricane Helene.",
+      "Observe les détails : les doigts se confondent avec les poils du chiot, la peau, les larmes et le gilet paraissent très lisses, et l'arrière-plan est flou comme une peinture numérique.": "Look closely: the fingers blend into the puppy's fur, the skin, tears, and life jacket look unusually smooth, and the background is blurred like a digital painting.",
+      "Faux. Cette image a été générée par IA. Les doigts et les poils se mélangent, les textures sont trop lisses et l'arrière-plan ressemble à une peinture numérique plutôt qu'à une photo de presse.": "False. This image was AI-generated. The fingers and fur blend together, the textures are too smooth, and the background looks like a digital painting rather than a press photo.",
+      "Une étude du MIT montre que sur Twitter, les fausses informations se propagent plus vite et plus loin que les vraies.": "A MIT study found that on Twitter, false news spreads faster and farther than the truth.",
+      "Surprenant ne veut pas dire faux. Cherche une source précise : revue, année, organisme.": "Surprising doesn't mean false. Look for a specific source: journal, year, institution.",
+      "Vrai. Étude du MIT publiée dans Science en 2018, vérifiable. Ironique, non ?": "True. The MIT study was published in Science in 2018 and can be verified. Ironic, isn't it?",
+      "Selon une étude de l'Université de Stanford, 97 % des étudiants qui utilisent leur téléphone en cours échouent à leurs examens.": "A Stanford study says 97% of students who use their phones in class fail their exams.",
+      "Un nom d'université prestigieux, un chiffre très précis... mais où est l'étude ?": "A prestigious university name and a very precise statistic... but where is the study?",
+      "Faux. Un grand nom + un chiffre extrême donnent un faux air sérieux. Sans titre, auteurs ni lien : invérifiable.": "False. A famous name and an extreme statistic can sound authoritative. Without a title, authors, or link, it can't be verified.",
+      "VIDÉO (6 secondes) : le directeur déclare « ...on va supprimer les vacances de Noël... »": "VIDEO (6 seconds): the principal says, '...we're going to cancel the winter break...'",
+      "6 secondes seulement. Que dit le début de la phrase ? Et la fin ?": "Only six seconds. What came before the quote? And what came after?",
+      "Faux. Extrait sorti de son contexte : la phrase complète évoquait une hypothèse écartée. Une citation coupée peut dire le contraire.": "False. The clip is out of context: the full sentence discussed an idea that was rejected. A clipped quote can reverse the meaning.",
+      "Niveau 4 : L'épreuve finale": "Level 4: The Final Test",
+      "👑 Maître de l'esprit critique": "👑 Critical Thinking Master",
+      "Dernier niveau. Je ne peux plus t'aider : je dois te faire confiance.": "Final level. I can't help you anymore: I have to trust you.",
+      "15 secondes par post. Le vrai et le faux se ressemblent.": "15 seconds per post. Truth and lies can look alike.",
+      "Les pieuvres ont trois cœurs.": "Octopuses have three hearts.",
+      "Vrai. Deux cœurs pour les branchies, un pour le reste du corps. Un fait absurde peut être exact.": "True. Two hearts pump blood to the gills, and one to the rest of the body. An odd fact can still be true.",
+      "COMMUNIQUÉ : suite à un incident technique, les examens de janvier sont annulés. Les notes seront calculées sur le contrôle continu.": "NOTICE: due to a technical issue, January exams are cancelled. Grades will be based on coursework.",
+      "Faux. Regarde le nom du compte : un zéro à la place du « O ». Un faux compte qui imite l'officiel.": "False. Look at the account name: it uses a zero instead of the letter O. It's impersonating the official account.",
+      "Botaniquement, une banane est une baie, mais pas une fraise.": "Botanically, a banana is a berry, but a strawberry isn't.",
+      "Vrai. Définition botanique des baies : la banane en est une, la fraise non. Contre-intuitif, mais exact.": "True. Botanically, bananas are berries, but strawberries aren't. Counterintuitive, but correct.",
+      "✅ Vrai": "✅ True",
+      "❌ Faux": "❌ False",
+      "💡 Aide de V (": "💡 V's hint (",
+      "restante": "remaining",
+      "restantes": "remaining",
+      "⏱️ Temps écoulé !": "⏱️ Time's up!",
+      "Je dis que c'est VRAI.": "I say it's TRUE.",
+      "Je dis que c'est FAUX.": "I say it's FALSE.",
+      "✅ Bien vu. ": "✅ Good catch. ",
+      "❌ Raté. ": "❌ Not quite. ",
+      "Tu progresses vite. Mais la suite sera plus difficile...": "You're improving fast. But the next level will be harder...",
+      "Incroyable. Dans mon époque, il manque des gens comme toi. Retiens ça : s'arrêter 5 secondes avant de partager, c'est déjà un super-pouvoir.": "Incredible. My time needs more people like you. Remember: pausing for five seconds before sharing is already a superpower.",
+      "CANAL 07 // PARTAGE": "CHANNEL 07 // SHARE",
+      "SIGNAL INTERCEPTÉ": "SIGNAL INTERCEPTED",
+      "Partage intercepté": "Share intercepted",
+      "[ALERTE] Envoi de la publication détecté...": "[ALERT] Post upload detected...",
+      "[DÉTOURNEMENT] Destination inconnue.": "[REDIRECT] Unknown destination.",
+      "[SOURCE] app://campus-inconnu": "[SOURCE] app://unknown-campus",
+      "[ACCÈS] Session verrouillée.": "[ACCESS] Session locked.",
+      "OUVERTURE DE LA PAGE...": "OPENING PAGE..."
+    };
+
+    function traduire(texte) {
+      return langue === "en" ? (traductionsEN[texte] || texte) : texte;
+    }
+
+    let secondesAvant2100 = 3;
+    let compteReboursTermine = false;
+    let intervalleCompteRebours = null;
+
+    function actualiserAccueil() {
+      const anglais = langue === "en";
+      document.documentElement.lang = langue;
+      document.title = "BECOME AWARE";
+      const titre = "BECOME AWARE";
+      document.getElementById("welcome-title").textContent = titre;
+      document.getElementById("welcome-title").dataset.glitch = titre;
+      document.getElementById("welcome-title").setAttribute("aria-label", titre);
+      document.getElementById("welcome-tagline").textContent = "The future is in your hands";
+      document.querySelector(".welcome-mark").textContent = anglais
+        ? "CHANNEL 07 // EMERGENCY BROADCAST"
+        : "CANAL 07 // TRANSMISSION D'URGENCE";
+      document.querySelectorAll(".signal-message").forEach(message => {
+        message.textContent = anglais ? message.dataset.en : message.dataset.fr;
+      });
+      document.getElementById("countdown-label").textContent = compteReboursTermine
+        ? (anglais ? "SIGNAL RECEIVED FROM YEAR" : "SIGNAL REÇU DE L'ANNÉE")
+        : (anglais ? "SIGNAL FROM YEAR 2100 IN" : "SIGNAL DE 2100 DANS");
+      document.getElementById("countdown-status").textContent = compteReboursTermine
+        ? (anglais ? "TIMELINE ORIGIN: 2100" : "ORIGINE TEMPORELLE : 2100")
+        : (anglais ? "INCOMING TRANSMISSION // YEAR 2100" : "TRANSMISSION EN APPROCHE // ANNÉE 2100");
+      const valeurCompteRebours = compteReboursTermine ? "2100" : "00:0" + secondesAvant2100;
+      const nombre = document.getElementById("countdown-number");
+      nombre.textContent = valeurCompteRebours;
+      nombre.dataset.glitch = valeurCompteRebours;
+      nombre.setAttribute("aria-label", compteReboursTermine
+        ? (anglais ? "Year 2100" : "Année 2100")
+        : (anglais ? "Signal from year 2100 in " : "Signal de l'année 2100 dans ") + secondesAvant2100 + (anglais ? " seconds" : " secondes"));
+      document.getElementById("start-button").textContent = anglais ? "Start" : "Commencer";
+      document.querySelectorAll("#language-switch button").forEach(button => {
+        button.setAttribute("aria-pressed", button.dataset.lang === langue);
+      });
+    }
+
+    function lancerCompteARebours() {
+      intervalleCompteRebours = setInterval(() => {
+        if (secondesAvant2100 > 1) secondesAvant2100--;
+        else {
+          secondesAvant2100 = 0;
+          compteReboursTermine = true;
+          clearInterval(intervalleCompteRebours);
+        }
+        actualiserAccueil();
+      }, 1000);
+    }
+
+    // ================= 1. L'HISTOIRE (scènes) =================
+    const scenes = {
+            learning: {
+        messages: [
+          { qui: "image", texte: "Images/learning-center.png", extra: "Le Learning Center" },
+          { qui: "narr", texte: "Une aprèm classique. Je suis assis(e) dans le canapé du Learning Center, mon café posé à côté, entre deux cours." },
+          { qui: "narr", texte: "Je sors mon téléphone et je me mets à scroller, sans vraiment regarder." }
+        ],
+        choix: [ { label: "Scroller sur mon téléphone 📱", vers: "debut" } ]
+      },
+
+      debut: {
+        messages: [
+          { qui: "narr", texte: "Mon pouce fait défiler le fil d'actualité... jusqu'à ce qu'un visuel me fasse m'arrêter." },
+          { qui: "post", texte: {
+              auteur: "@campus_alerte",
+              texte: "LE CAFÉ DE RSB EST EN RÉALITÉ FABRIQUÉ À PARTIR DES EAUX USÉES DES TOILETTES !",
+              imageSrc: "Images/toilet-coffee.png",
+              imageAlt: "Photo d'un café étiqueté « Toilet Coffee », présenté comme préparé avec des eaux usées."
+          } },
+              { qui: "P", texte: "Attends... c'est quoi ce truc encore ?" },
+              { qui: "P", texte: "Non mais c'est n'importe quoi ! Je balance ça direct sur le groupe de la promo, ils vont halluciner." },
+          { qui: "narr", texte: "Mon pouce s'arrête juste au-dessus du bouton « Partager »." }
+        ],
+        choix: [ { label: "📲 Partager cette publication", action: () => intercepterPartage() } ]
+      },
+      optionA: {
+        messages: [
+          { qui: "V", texte: "Sage décision. En prenant 5 secondes, tu remarques que l'image a une texture bizarre et que le texte sort de nulle part." },
+          { qui: "P", texte: "Ah ouais, bien vu... C'était gros comme une maison. J'ai failli passer pour un(e) idiot(e)." },
+          { qui: "V", texte: "Tu as évité le piège de justesse. Mais 90 % de ta promo n'aura pas ton réflexe." },
+          { qui: "P", texte: "C'est quoi ce relou... un étudiant du campus qui a piraté mon compte ?" },
+          { qui: "V", texte: "Un étudiant ? Je ne crois pas. Regarde plutôt l'écran de ton PC portable." }
+        ],
+        choix: [ { label: "Regarder le PC 💻", vers: "scene3" } ]
+      },
+      optionB: {
+        messages: [
+          { qui: "narr", texte: "Le téléphone vibre violemment. Une page inconnue s'ouvre et verrouille l'écran." },
+          { qui: "V", texte: "Wow, tout doux ! Tu as pris 2 secondes pour vérifier si l'image était vraie, ou tu partages juste parce que ça te fait réagir ?" }
+        ],
+        choix: [
+          { label: "📲 Partager sans vérifier", vers: "partageSansVerif", points: -20 },
+          { label: "🔍 Prendre 30 secondes pour vérifier", vers: "verifTardive", points: 10 }
+        ]
+      },
+      partageSansVerif: {
+        messages: [
+          { qui: "V", texte: "NON ! Ne clique pas sur envoyer !" },
+          { qui: "V", texte: "Si tu balances cette infox, tu ouvres la boîte de Pandore. Lâche ce téléphone !" },
+          { qui: "P", texte: "C'est quoi ce relou... un étudiant du campus qui a piraté mon compte ?" },
+          { qui: "V", texte: "Un étudiant ? Je ne crois pas. Puisque tu m'ignores sur ton téléphone, regarde l'écran de ton PC." }
+        ],
+        choix: [ { label: "Regarder le PC 💻", vers: "scene3" } ]
+      },
+      verifTardive: {
+        messages: [
+          { qui: "V", texte: "Trop tard, l'impulsion a failli l'emporter. Même si tu hésites maintenant, le visuel a déjà commencé à tourner sur les réseaux du campus." },
+          { qui: "V", texte: "Regarde l'écran de ton PC portable. On a un problème plus urgent à régler." }
+        ],
+        choix: [ { label: "Regarder le PC 💻", vers: "scene3" } ]
+      },
+      scene3: {
+        messages: [
+          { qui: "narr", texte: "L'écran du PC clignote. Toutes mes applis se ferment. Une fenêtre de visio s'ouvre : un visage avec un masque bizarre." },
+          { qui: "V", texte: "Écoute. Je viens de 2100. En 2100, les États se sont écroulés sous le poids de la désinformation générée par IA. Ton post sur le café, c'est la première brique de cet effondrement." },
+          { qui: "P", texte: "Tu as trop regardé de films de science-fiction. Tout le monde sait que c'est faux, non ?" },
+          { qui: "V", texte: "Ah oui ? « Tout le monde le sait » ? Clique sur l'outil d'analyse sur ton bureau. On va voir si tu es si calé(e) face à un algorithme." }
+        ],
+        // "action" = on lance une fonction au lieu d'aller vers une autre scène
+        choix: [ { label: "Ouvrir l'outil d'analyse 🔎", action: () => lancerNiveau(0) } ]
+      }
+    };
+
+    // ================= 2. LES NIVEAUX =================
+    // vrai: true  -> le post est vrai   |   vrai: false -> le post est faux
+    const niveaux = [
+      {
+        nom: "Niveau 1 : Les évidences", badge: "🥉 Œil de débutant", aides: 3, temps: 0,
+        intro: [
+          "Je te montre trois posts. Pour chacun : vrai ou faux ?",
+          "Tu peux me demander de l'aide, 3 fois maximum."
+        ],
+        items: [
+          { auteur: "@campus_video",
+            texte: "VIDÉO VIRALE : Donald Trump et Vladimir Poutine se lancent dans une chorégraphie improvisée. PARTAGEZ AVANT SUPPRESSION !",
+            video: "Videos/1a.mp4",
+            videoAlt: "Vidéo truquée montrant Donald Trump et Vladimir Poutine en train de danser.",
+            vrai: false,
+            aide: "",
+            explication: "Faux. Cette vidéo est un deepfake de Donald Trump et Vladimir Poutine. Des gestes ou des situations improbables peuvent être des indices, mais il faut aussi vérifier la source." },
+          { auteur: "@people_flash",
+            texte: "RUMEUR : Brad Pitt serait hospitalisé. Une publication attribuée à Anne prétend révéler son état de santé. Cette photo prouve quelque chose ?",
+            imageSrc: "Images/1b.webp",
+            imageAlt: "Photo présentée comme montrant Brad Pitt à l'hôpital, sans source vérifiable.",
+            vrai: false,
+            aide: "Tu crois vraiment qu'un acteur aussi fortuné que Brad Pitt aurait besoin qu'on lui paie son séjour à l'hôpital ? Ça ne prouve rien à elle seule : vérifie la source et qui est Anne.",
+            explication: "Faux. Cette image ne prouve pas l'hospitalisation de Brad Pitt ni qui l'aurait publiée. Un post sensationnel et une photo émouvante ne remplacent pas une source fiable." },
+          { auteur: "@archives_visuelles",
+            texte: "En Corée du Nord, des dizaines de milliers de personnes forment une immense mosaïque représentant le président du pays.",
+            imageSrc: "Images/1c.jpeg",
+            imageAlt: "Une mosaïque géante représentant Kim Il-sung, composée de panneaux colorés présentés devant une foule.",
+            vrai: true,
+            aide: "Observe la foule et les panneaux colorés : le portrait est composé d'une multitude d'éléments coordonnés.",
+            explication: "Vrai. Lors de spectacles de masse en Corée du Nord, des milliers de participants coordonnent des panneaux colorés pour composer des images monumentales." }
+        ]
+      },
+      {
+        nom: "Niveau 2 : Les imitations", badge: "🥈 Éclaireur", aides: 2, temps: 40,
+        intro: [
+          "Pas mal ! Mais les vrais manipulateurs sont plus malins que ça.",
+          "Maintenant : 40 secondes par post, et je ne peux t'aider que 2 fois."
+        ],
+        items: [
+          { auteur: "@campus_buzz",
+            texte: "VIDÉO INCROYABLE : des lapins font du trampoline dans la bibliothèque ! 😱",
+            video: "Videos/2a.mp4",
+            videoAlt: "Vidéo de lapins qui sautent sur un trampoline.",
+            vrai: false,
+            aide: "Observe bien les lapins : leurs mouvements, leurs contours et leurs ombres. Un détail peut trahir une vidéo truquée.",
+            explication: "Faux. Une vidéo peut sembler convaincante tout en étant truquée. Observe les mouvements et les détails, puis cherche la source originale." },
+          { auteur: "@actualites_flash",
+            texte: "Des images circulent en ligne et montreraient Donald Trump en train d'être arrêté. Que s'est-il vraiment passé ?",
+            imageSrc: "Images/2b.jpeg",
+            imageAlt: "Image montrant Donald Trump entouré de policiers et semblant être arrêté.",
+            vrai: false,
+            aide: "Cette image a été créée avec Midjourney, un outil d'intelligence artificielle. Vérifie si des sources fiables confirment l'arrestation.",
+            explication: "Faux. Cette image générée avec Midjourney ne montre pas une arrestation réelle de Donald Trump." },
+          { auteur: "@faune_des_profondeurs",
+            texte: "Ce poisson des profondeurs possède une tête transparente qui laisse voir certains de ses organes.",
+            imageSrc: "Images/2c.jpeg",
+            imageAlt: "Poisson des profondeurs avec une tête transparente, laissant apparaître ses organes internes.",
+            vrai: true,
+            aide: "La tête transparente de ce poisson est une caractéristique réelle de certaines espèces des profondeurs.",
+            explication: "Vrai. Il s'agit du poisson barreleye, une espèce réelle dont le dôme transparent laisse voir ses yeux à l'intérieur de la tête." }
+        ]
+      },
+      {
+        nom: "Niveau 3 : Les faux crédibles", badge: "🥇 Détective", aides: 1, temps: 25,
+        intro: [
+          "Là, ça se corse : les faux semblent sérieux, et certains vrais semblent incroyables.",
+          "25 secondes par post. Une seule aide."
+        ],
+        items: [
+          { auteur: "@images_du_jour",
+            texte: "Une fillette en larmes serre son chiot sur une barque après le passage de l'ouragan Helene aux États-Unis.",
+            imageSrc: "Images/3a.jpeg",
+            imageAlt: "Image présentée comme une photo d'une fillette en larmes tenant son chiot sur une barque après l'ouragan Helene.",
+            vrai: false,
+            aide: "Observe les détails : les doigts se confondent avec les poils du chiot, la peau, les larmes et le gilet paraissent très lisses, et l'arrière-plan est flou comme une peinture numérique.",
+            explication: "Faux. Cette image a été générée par IA. Les doigts et les poils se mélangent, les textures sont trop lisses et l'arrière-plan ressemble à une peinture numérique plutôt qu'à une photo de presse." },
+          { auteur: "@sciences_et_vie_etudiante",
+            texte: "Selon une étude de l'Université de Stanford, 97 % des étudiants qui utilisent leur téléphone en cours échouent à leurs examens.",
+            vrai: false,
+            aide: "Un nom d'université prestigieux, un chiffre très précis... mais où est l'étude ?",
+            explication: "Faux. Un grand nom + un chiffre extrême donnent un faux air sérieux. Sans titre, auteurs ni lien : invérifiable." },
+          { auteur: "@video_choc",
+            texte: "VIDÉO (6 secondes) : le directeur déclare « ...on va supprimer les vacances de Noël... »",
+            vrai: false,
+            aide: "6 secondes seulement. Que dit le début de la phrase ? Et la fin ?",
+            explication: "Faux. Extrait sorti de son contexte : la phrase complète évoquait une hypothèse écartée. Une citation coupée peut dire le contraire." }
+        ]
+      },
+      {
+        nom: "Niveau 4 : L'épreuve finale", badge: "👑 Maître de l'esprit critique", aides: 0, temps: 15,
+        intro: [
+          "Dernier niveau. Je ne peux plus t'aider : je dois te faire confiance.",
+          "15 secondes par post. Le vrai et le faux se ressemblent."
+        ],
+        items: [
+          { auteur: "@savoirs_insolites",
+            texte: "Les pieuvres ont trois cœurs.",
+            vrai: true,
+            aide: "",
+            explication: "Vrai. Deux cœurs pour les branchies, un pour le reste du corps. Un fait absurde peut être exact." },
+          { auteur: "@RSB_0fficiel ✔",
+            texte: "COMMUNIQUÉ : suite à un incident technique, les examens de janvier sont annulés. Les notes seront calculées sur le contrôle continu.",
+            vrai: false,
+            aide: "",
+            explication: "Faux. Regarde le nom du compte : un zéro à la place du « O ». Un faux compte qui imite l'officiel." },
+          { auteur: "@botanique_facile",
+            texte: "Botaniquement, une banane est une baie, mais pas une fraise.",
+            vrai: true,
+            aide: "",
+            explication: "Vrai. Définition botanique des baies : la banane en est une, la fraise non. Contre-intuitif, mais exact." }
+        ]
+      }
+    ];
+
+    // ================= 3. VARIABLES DU JEU =================
+    let score = 50;
+    let niveauActuel = 0;
+    let itemActuel = 0;
+    let bonnes = 0;
+    let vies = 3;
+    let aides = 0;
+    let minuteur = null;
+    let bAide = null;
+    let vGlitchCount = 0;
+    let musiqueDefaite = null;
+
+    const chat = document.getElementById("chat");
+    const zoneChoix = document.getElementById("choix");
+    const app = document.getElementById("app");
+    const sons = {
+      clic: new Audio("Sounds/click.mp3"),
+      perte: new Audio("Sounds/Mort.mp3"),
+      niveau: new Audio("Sounds/next level.mp3")
+    };
+
+    function jouerSon(nom) {
+      const son = sons[nom];
+      if (!son) return;
+      const lecture = son.cloneNode();
+      lecture.volume = nom === "clic" ? 0.35 : 0.8;
+      lecture.play().catch(() => {});
+      return lecture;
+    }
+
+    function ouvrirEcranDefaite() {
+      clearInterval(minuteur);
+      document.getElementById("timer-fond").style.visibility = "hidden";
+      const ecran = document.getElementById("game-over");
+      const anglais = langue === "en";
+      document.getElementById("game-over-code").textContent = anglais ? "SIGNAL LOST // LIVES DEPLETED" : "SIGNAL PERDU // VIES ÉPUISÉES";
+      document.getElementById("game-over-title").textContent = anglais ? "GAME OVER" : "PARTIE TERMINÉE";
+      document.getElementById("game-over-message").textContent = anglais ? "You ran out of lives." : "Tes trois vies sont épuisées.";
+      document.getElementById("retry-level-button").textContent = anglais ? "Retry this level" : "Refaire le niveau";
+      document.getElementById("restart-game-button").textContent = anglais ? "Restart the game" : "Recommencer le jeu";
+      document.getElementById("home-button").textContent = anglais ? "Return to the title screen" : "Retourner à l'écran d'accueil";
+      ecran.hidden = false;
+      app.inert = true;
+      musiqueDefaite = jouerSon("perte");
+      document.getElementById("retry-level-button").focus();
+    }
+
+    function fermerEcranDefaite() {
+      const ecran = document.getElementById("game-over");
+      ecran.hidden = true;
+      app.inert = false;
+      if (musiqueDefaite) {
+        musiqueDefaite.pause();
+        musiqueDefaite.currentTime = 0;
+        musiqueDefaite = null;
+      }
+    }
+
+    function naviguerAuDebut(demarrerDirectement) {
+      const url = new URL(location.href);
+      url.search = "";
+      if (langue === "en") url.searchParams.set("lang", "en");
+      if (demarrerDirectement) url.searchParams.set("start", "1");
+      location.href = url.href;
+    }
+
+    function actualiserVies() {
+      const affichage = document.getElementById("vies");
+      affichage.innerHTML = Array.from({ length: 3 }, (_, index) =>
+        '<span class="coeur' + (index < vies ? "" : " coeur-vide") + '" aria-hidden="true">♥</span>'
+      ).join("");
+      affichage.setAttribute("aria-label", langue === "en"
+        ? "Lives: " + vies + " of 3"
+        : "Vies : " + vies + " sur 3");
+    }
+
+    // ================= 4. OUTILS =================
+    function pause(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+    function defilerJournal() {
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function declencherGlitch() {
+      app.classList.remove("glitching");
+      void app.offsetWidth;
+      app.classList.add("glitching");
+      setTimeout(() => app.classList.remove("glitching"), 520);
+    }
+
+    function changerScore(points) {
+      score = Math.max(0, Math.min(100, score + points));
+      document.getElementById("jauge").style.width = score + "%";
+      document.getElementById("score").textContent = score;
+    }
+
+    function actualiserProgression(niveauTermine = false) {
+      const total = niveaux.length * 3;
+      const reponsesValidees = niveauActuel * 3 + (niveauTermine ? 3 : bonnes);
+      const progression = Math.min(total, reponsesValidees);
+      const barre = document.getElementById("progression-track");
+      document.getElementById("progression-label").textContent = langue === "en"
+        ? "DISINFORMATION DEFENSE"
+        : "RÉSISTANCE AUX INFOX";
+      document.getElementById("progression-value").textContent = langue === "en"
+        ? "LEVEL " + Math.min(niveauActuel + 1, niveaux.length) + " / " + niveaux.length + " · " + progression + " / " + total
+        : "NIVEAU " + Math.min(niveauActuel + 1, niveaux.length) + " / " + niveaux.length + " · " + progression + " / " + total;
+      document.getElementById("progression-fill").style.width = (progression / total * 100) + "%";
+      barre.setAttribute("aria-valuenow", progression);
+      barre.setAttribute("aria-valuetext", langue === "en"
+        ? progression + " of " + total + " correct answers"
+        : progression + " sur " + total + " réponses justes");
+    }
+
+    function ajouterMessage(qui, texte, extra) {
+      if (qui === "narr") {
+        const narr = document.createElement("div");
+        narr.className = "narr";
+        narr.textContent = traduire(texte);
+        chat.appendChild(narr);
+      } else if (qui === "image") {
+        const decor = document.createElement("div");
+        decor.className = "decor";
+        const image = document.createElement("img");
+        image.src = texte;
+        image.alt = traduire(extra || "Le Learning Center");
+        decor.appendChild(image);
+        if (extra) {
+          const legende = document.createElement("div");
+          legende.className = "legende";
+          legende.textContent = traduire(extra);
+          decor.appendChild(legende);
+        }
+        chat.appendChild(decor);
+      } else if (qui === "post") {
+        const carte = document.createElement("div");
+        carte.className = "post";
+        const auteur = document.createElement("div");
+        auteur.className = "post-auteur";
+        auteur.textContent = traduire(texte.auteur);
+        const contenu = document.createElement("div");
+        contenu.className = "post-texte";
+        contenu.textContent = traduire(texte.texte);
+        carte.append(auteur, contenu);
+        if (texte.imageSrc || texte.image) {
+          const image = document.createElement("div");
+          image.className = texte.imageSrc ? "post-image post-image-photo" : "post-image";
+          if (texte.imageSrc) {
+            const photo = document.createElement("img");
+            photo.src = texte.imageSrc;
+            photo.alt = traduire(texte.imageAlt || "");
+            image.appendChild(photo);
+          } else {
+            image.textContent = traduire(texte.image);
+          }
+          carte.appendChild(image);
+        }
+        chat.appendChild(carte);
+      } else {
+        const ligne = document.createElement("div");
+        ligne.className = "ligne " + qui;
+        ligne.innerHTML = '<div class="avatar"></div><div class="bulle"></div>';
+        const avatar = ligne.querySelector(".avatar");
+        if (qui === "V") avatar.textContent = "???";
+        else {
+          const photo = document.createElement("img");
+          photo.src = "Images/player-avatar.jpg";
+          photo.alt = langue === "en" ? "Protagonist avatar" : "Avatar du protagoniste";
+          avatar.appendChild(photo);
+        }
+        const bulle = ligne.querySelector(".bulle");
+        bulle.textContent = traduire(texte);
+        chat.appendChild(ligne);
+        if (qui === "V" && vGlitchCount < 2) {
+          vGlitchCount++;
+          declencherGlitch();
+        }
+      }
+      defilerJournal();
+    }
+
+    function creerBouton(label, fonction, classe) {
+      const b = document.createElement("button");
+      b.textContent = label;
+      b.onclick = () => { jouerSon("clic"); fonction(); };
+      if (classe) b.className = classe;
+      return b;
+    }
+
+    function boutonUnique(label, fonction) {
+      zoneChoix.innerHTML = "";
+      zoneChoix.appendChild(creerBouton(label, fonction));
+    }
+
+    async function intercepterPartage() {
+      zoneChoix.innerHTML = "";
+      const ecran = document.getElementById("demarrage");
+      const entete = ecran.querySelectorAll(".terminal-entete span");
+      const lignes = ecran.querySelectorAll(".terminal-ligne");
+      entete[0].textContent = traduire("CANAL 07 // PARTAGE");
+      entete[1].textContent = traduire("SIGNAL INTERCEPTÉ");
+      ecran.querySelector(".terminal h2").textContent = traduire("Partage intercepté");
+      const prefixes = langue === "en"
+        ? ["[ALERT]", "[REDIRECT]", "[SOURCE]", "[ACCESS]"]
+        : ["[ALERTE]", "[DÉTOURNEMENT]", "[SOURCE]", "[ACCÈS]"];
+      const descriptions = langue === "en"
+        ? [" Post upload detected...", " Unknown destination.", " app://unknown-campus", " Session locked."]
+        : [" Envoi de la publication détecté...", " Destination inconnue.", " app://campus-inconnu", " Session verrouillée."];
+      lignes.forEach((ligne, index) => {
+        ligne.firstElementChild.textContent = prefixes[index];
+        ligne.lastChild.nodeValue = descriptions[index];
+      });
+      ecran.querySelector(".terminal-progression > span").textContent = langue === "en" ? "OPENING PAGE..." : "OUVERTURE DE LA PAGE...";
+      ecran.setAttribute("aria-label", langue === "en" ? "Share intercepted" : "Interception du partage");
+      ecran.classList.remove("termine");
+      await pause(220);
+      ecran.classList.add("actif");
+      await pause(2050);
+      ecran.classList.add("sortie");
+      await pause(300);
+      ecran.classList.remove("actif", "sortie");
+      ecran.classList.add("termine");
+      afficher("optionB");
+    }
+
+    async function afficherIntertitre(type, niveau = 0) {
+      const ecran = document.getElementById("intertitre");
+      const estNiveau = type === "niveau";
+      const estFin = type === "suite";
+      const numero = niveau + 1;
+      const titre = estFin
+        ? "TO BE CONTINUE"
+        : (estNiveau && niveau === 0 ? (langue === "en" ? "TUTORIAL" : "TUTORIEL") : langue === "en" ? "LEVEL " + numero : "NIVEAU " + numero);
+      document.getElementById("intertitre-code").textContent = estNiveau
+        ? (estNiveau && niveau === 0
+          ? (langue === "en" ? "TRAINING PROTOCOL" : "PROTOCOLE D'APPRENTISSAGE")
+          : (langue === "en" ? "SECTOR TRANSFER // DESTINATION" : "TRANSFERT DE SECTEUR // DESTINATION"))
+        : (langue === "en" ? "TRANSMISSION INTERRUPTED // MORE TO COME" : "TRANSMISSION INTERROMPUE // À SUIVRE");
+      document.getElementById("intertitre-titre").textContent = titre;
+      document.getElementById("intertitre-niveau").textContent = estNiveau
+        ? (langue === "en" ? "LEVEL " + numero + " / " + niveaux.length : "NIVEAU " + numero + " / " + niveaux.length)
+        : "";
+      document.getElementById("intertitre-alerte").textContent = estNiveau
+        ? (langue === "en" ? "ROUTING TO NEW SECTOR..." : "ROUTAGE VERS UN NOUVEAU SECTEUR...")
+        : (langue === "en" ? "SIGNAL LOST. THE STORY IS NOT OVER." : "SIGNAL PERDU. L'HISTOIRE N'EST PAS TERMINÉE.");
+      ecran.setAttribute("aria-label", estNiveau
+        ? (langue === "en" ? "Level " + numero : "Niveau " + numero)
+        : (langue === "en" ? "To be continued" : "À suivre"));
+      ecran.classList.remove("termine", "sortie", "actif");
+      void ecran.offsetWidth;
+      ecran.classList.add("actif");
+      await pause(estNiveau ? 1800 : 3200);
+      ecran.classList.add("sortie");
+      await pause(320);
+      ecran.classList.remove("actif", "sortie");
+      ecran.classList.add("termine");
+    }
+
+    // ================= 5. MOTEUR D'HISTOIRE =================
+    async function afficher(id) {
+      const scene = scenes[id];
+      zoneChoix.innerHTML = "";
+      for (const msg of scene.messages) {
+        await pause(900);
+        ajouterMessage(msg.qui, msg.texte, msg.extra);
+      }
+      await pause(500);
+      for (const choix of scene.choix) {
+        zoneChoix.appendChild(creerBouton(traduire(choix.label), () => {
+          if (choix.points) changerScore(choix.points);
+          if (choix.action) choix.action(); else afficher(choix.vers);
+        }));
+      }
+      defilerJournal();
+    }
+
+    // ================= 6. MOTEUR DE NIVEAUX =================
+    async function lancerNiveau(n) {
+      niveauActuel = n;
+      app.dataset.niveau = String(n + 1);
+      app.classList.remove("erreur");
+      itemActuel = 0;
+      bonnes = 0;
+      vies = 3;
+      actualiserVies();
+      aides = niveaux[n].aides;
+      actualiserProgression();
+      zoneChoix.innerHTML = "";
+      await afficherIntertitre("niveau", n);
+      for (const texte of niveaux[n].intro) {
+        await pause(900);
+        ajouterMessage("V", traduire(texte));
+      }
+      await pause(900);
+      afficherItem();
+    }
+
+    function afficherItem() {
+      const niveau = niveaux[niveauActuel];
+      const item = niveau.items[itemActuel];
+      document.getElementById("info").textContent = langue === "en"
+        ? "Level " + (niveauActuel + 1) + " · Post " + (itemActuel + 1) + "/" + niveau.items.length
+        : "Niv. " + (niveauActuel + 1) + " · Post " + (itemActuel + 1) + "/" + niveau.items.length;
+
+      // La carte du post
+      const carte = document.createElement("div");
+      carte.className = "post";
+      carte.innerHTML = '<div class="post-auteur"></div><div class="post-texte"></div>';
+      carte.querySelector(".post-auteur").textContent = traduire(item.auteur);
+      carte.querySelector(".post-texte").textContent = traduire(item.texte);
+      if (item.imageSrc || item.image) {
+        const img = document.createElement("div");
+        img.className = item.imageSrc ? "post-image post-image-photo" : "post-image";
+        if (item.imageSrc) {
+          const photo = document.createElement("img");
+          photo.src = item.imageSrc;
+          photo.alt = traduire(item.imageAlt || "");
+          img.appendChild(photo);
+        } else {
+          img.textContent = traduire(item.image);
+        }
+        carte.appendChild(img);
+      }
+      if (item.video) {
+        const video = document.createElement("video");
+        video.className = "post-video";
+        video.src = item.video;
+        video.controls = true;
+        video.preload = "metadata";
+        video.playsInline = true;
+        video.setAttribute("aria-label", traduire(item.videoAlt || "Vidéo du post"));
+        if (item.videoPoster) video.poster = item.videoPoster;
+        const limiterLecture = () => {
+          if (video.currentTime >= 6) {
+            video.pause();
+            if (video.currentTime > 6) video.currentTime = 6;
+          }
+        };
+        video.addEventListener("timeupdate", limiterLecture);
+        video.addEventListener("seeking", limiterLecture);
+        carte.appendChild(video);
+      }
+      chat.appendChild(carte);
+      defilerJournal();
+
+      // Les boutons
+      zoneChoix.innerHTML = "";
+      zoneChoix.appendChild(creerBouton(traduire("✅ Vrai"), () => repondre(true)));
+      zoneChoix.appendChild(creerBouton(traduire("❌ Faux"), () => repondre(false)));
+      bAide = null;
+      if (niveau.aides > 0) {
+        bAide = creerBouton("", () => {
+          if (aides <= 0) return;
+          aides--;
+          const aide = item.aide || (langue === "en"
+            ? "Seriously? Have you ever seen world leaders dance like that? It's obviously a deepfake."
+            : "Sérieusement ? T'as déjà vu des chefs d'État danser comme ça ? C'est évidemment un deepfake.");
+          ajouterMessage("V", item.aide ? "💡 " + traduire(aide) : aide);
+          majAide();
+          bAide.disabled = true; // une seule aide par post
+        }, "aide");
+        zoneChoix.appendChild(bAide);
+        majAide();
+      }
+
+      demarrerMinuteur(niveau.temps);
+    }
+
+    function majAide() {
+      if (!bAide) return;
+      bAide.textContent = langue === "en"
+        ? "💡 V's hint (" + aides + " remaining)"
+        : "💡 Aide de V (" + aides + " restante" + (aides > 1 ? "s" : "") + ")";
+      bAide.disabled = aides <= 0;
+    }
+
+    function demarrerMinuteur(secondes) {
+      clearInterval(minuteur);
+      const fond = document.getElementById("timer-fond");
+      const barre = document.getElementById("timer");
+      if (!secondes) { fond.style.visibility = "hidden"; return; }
+      fond.style.visibility = "visible";
+      barre.style.transition = "none";
+      barre.style.width = "100%";
+      void barre.offsetWidth; // petit truc pour relancer l'animation
+      barre.style.transition = "width 1s linear";
+      let reste = secondes;
+      minuteur = setInterval(() => {
+        reste--;
+        barre.style.width = (reste / secondes * 100) + "%";
+        if (reste <= 0) repondre(null); // temps écoulé
+      }, 1000);
+    }
+
+    async function repondre(reponse) {
+      clearInterval(minuteur);
+      zoneChoix.innerHTML = "";
+      const niveau = niveaux[niveauActuel];
+      const item = niveau.items[itemActuel];
+
+      if (reponse === null) {
+        ajouterMessage("narr", traduire("⏱️ Temps écoulé !"));
+      } else {
+        ajouterMessage("P", traduire(reponse ? "Je dis que c'est VRAI." : "Je dis que c'est FAUX."));
+      }
+
+      const correct = (reponse === item.vrai);
+      if (correct) {
+        bonnes++;
+        vies = Math.min(3, vies + 1);
+        app.classList.remove("erreur");
+        changerScore(10);
+      } else {
+        vies = Math.max(0, vies - 1);
+        app.classList.add("erreur");
+        changerScore(-10);
+      }
+      actualiserVies();
+      actualiserProgression();
+
+      const reaction = langue === "en"
+        ? (correct ? "✅ Good catch. " : "❌ Not quite. ")
+        : (correct ? "✅ Bien vu. " : "❌ Raté. ");
+      ajouterMessage("V", reaction + traduire(item.explication));
+      if (vies === 0) {
+        ouvrirEcranDefaite();
+        return;
+      }
+      await pause(1800);
+
+      itemActuel++;
+      if (vies <= 0 || itemActuel >= niveau.items.length) finNiveau(); else afficherItem();
+    }
+
+    async function finNiveau() {
+      const niveau = niveaux[niveauActuel];
+      document.getElementById("timer-fond").style.visibility = "hidden";
+      const total = niveau.items.length;
+      actualiserProgression(bonnes >= 2);
+
+      if (vies > 0 && bonnes >= 2) {
+        ajouterMessage("narr", langue === "en"
+          ? "🏅 Badge unlocked: " + traduire(niveau.badge) + " (" + bonnes + "/" + total + ")"
+          : "🏅 Badge débloqué : " + traduire(niveau.badge) + " (" + bonnes + "/" + total + ")");
+        await pause(1000);
+        if (niveauActuel < niveaux.length - 1) {
+          ajouterMessage("V", traduire("Tu progresses vite. Mais la suite sera plus difficile..."));
+          boutonUnique(langue === "en" ? "Next level ➜" : "Niveau suivant ➜", () => {
+            jouerSon("niveau");
+            lancerNiveau(niveauActuel + 1);
+          });
+        } else {
+          ajouterMessage("V", traduire("Incroyable. Dans mon époque, il manque des gens comme toi. Retiens ça : s'arrêter 5 secondes avant de partager, c'est déjà un super-pouvoir."));
+          await pause(2200);
+          await afficherIntertitre("suite");
+          boutonUnique(langue === "en" ? "Play again 🔁" : "Rejouer 🔁", () => location.reload());
+        }
+      } else {
+        ajouterMessage("V", langue === "en"
+          ? (vies === 0 ? "No lives left. Retry this level to try again." : "Only " + bonnes + "/" + total + ". You need at least 2 correct answers. Take a breath and try again.")
+          : (vies === 0 ? "Plus de vies. Recommence ce niveau pour retenter ta chance." : "Seulement " + bonnes + "/" + total + ". Il faut au moins 2 bonnes réponses. Respire, et recommence."));
+        boutonUnique(langue === "en" ? "Retry this level" : "Réessayer ce niveau", () => lancerNiveau(niveauActuel));
+      }
+    }
+
+    // ================= 7. ON LANCE LE JEU =================
+    function demarrerPartie() {
+      clearInterval(intervalleCompteRebours);
+      const anglais = langue === "en";
+      document.getElementById("game-title").textContent = "BECOME AWARE";
+      document.getElementById("desk-label").textContent = anglais ? "WATCH // MISINFORMATION UNIT" : "VIGIE // CELLULE ANTI-INFOX";
+      document.getElementById("network-label").textContent = anglais ? "NETWORK COMPROMISED" : "RÉSEAU COMPROMIS";
+      document.getElementById("critique-label").textContent = anglais ? "Critical thinking:" : "Esprit critique :";
+      actualiserProgression();
+      document.getElementById("welcome-screen").remove();
+      app.classList.add("app-active");
+      afficher("learning");
+    }
+
+    document.querySelectorAll("#language-switch button").forEach(button => {
+      button.addEventListener("click", () => {
+        jouerSon("clic");
+        langue = button.dataset.lang;
+        actualiserAccueil();
+      });
+    });
+    document.getElementById("start-button").addEventListener("click", () => {
+      jouerSon("clic");
+      demarrerPartie();
+    });
+    document.getElementById("retry-level-button").addEventListener("click", () => {
+      jouerSon("clic");
+      fermerEcranDefaite();
+      lancerNiveau(niveauActuel);
+    });
+    document.getElementById("restart-game-button").addEventListener("click", () => {
+      jouerSon("clic");
+      naviguerAuDebut(true);
+    });
+    document.getElementById("home-button").addEventListener("click", () => {
+      jouerSon("clic");
+      naviguerAuDebut(false);
+    });
+    actualiserAccueil();
+    if (new URLSearchParams(location.search).get("start") === "1") demarrerPartie();
+    else lancerCompteARebours();
+  </script>
+</body>
+</html>
