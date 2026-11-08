@@ -971,7 +971,6 @@
     const zoneChoix = document.getElementById("choix");
     const app = document.getElementById("app");
     const sons = {
-      clic: new Audio("Sounds/click.mp3"),
       perte: new Audio("Sounds/Mort.mp3"),
       niveau: new Audio("Sounds/next level.mp3")
     };
@@ -980,7 +979,7 @@
       const son = sons[nom];
       if (!son) return;
       const lecture = son.cloneNode();
-      lecture.volume = nom === "clic" ? 0.35 : 0.8;
+      lecture.volume = 0.8;
       lecture.play().catch(() => {});
       return lecture;
     }
@@ -1138,7 +1137,7 @@
     function creerBouton(label, fonction, classe) {
       const b = document.createElement("button");
       b.textContent = label;
-      b.onclick = () => { jouerSon("clic"); fonction(); };
+      b.onclick = fonction;
       if (classe) b.className = classe;
       return b;
     }
@@ -1435,26 +1434,21 @@
 
     document.querySelectorAll("#language-switch button").forEach(button => {
       button.addEventListener("click", () => {
-        jouerSon("clic");
         langue = button.dataset.lang;
         actualiserAccueil();
       });
     });
     document.getElementById("start-button").addEventListener("click", () => {
-      jouerSon("clic");
       demarrerPartie();
     });
     document.getElementById("retry-level-button").addEventListener("click", () => {
-      jouerSon("clic");
       fermerEcranDefaite();
       lancerNiveau(niveauActuel);
     });
     document.getElementById("restart-game-button").addEventListener("click", () => {
-      jouerSon("clic");
       naviguerAuDebut(true);
     });
     document.getElementById("home-button").addEventListener("click", () => {
-      jouerSon("clic");
       naviguerAuDebut(false);
     });
     actualiserAccueil();
