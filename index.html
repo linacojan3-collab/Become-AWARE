@@ -144,6 +144,17 @@
     #language-switch button[aria-pressed="true"] { background:#8d2431; }
     #start-button { margin:0; width:220px; border:1px solid #c0b9b8; border-left:4px solid #d34450; border-radius:2px; background:rgba(71,13,24,.88); box-shadow:none; text-align:left; text-transform:uppercase; }
     #start-button:hover { background:#a52e3d; transform:translateX(4px); box-shadow:none; }
+    #credits-button { display:block; width:220px; min-height:46px; margin-top:10px; padding:10px 24px; border:1px solid #797b7c; border-left:4px solid #797b7c; background:rgba(12,13,16,.84); color:#ededeb; font:700 1rem "Trebuchet MS", sans-serif; text-align:left; text-transform:uppercase; cursor:pointer; }
+    #credits-button:hover { background:#30252b; }
+    #credits-button:focus-visible, #credits-close:focus-visible { outline:3px solid #e4f2f7; outline-offset:3px; }
+    #credits-dialog { width:min(620px, calc(100% - 32px)); max-height:calc(100% - 32px); padding:24px; border:1px solid #84414d; border-top:4px solid #d34450; background:#141117; color:#f1e8e9; }
+    #credits-dialog::backdrop { background:rgba(3,4,8,.88); }
+    #credits-dialog h2 { margin:0 0 20px; color:#e4f2f7; font:800 1.65rem/1.1 "Segoe UI", "Trebuchet MS", sans-serif; }
+    #credits-dialog h3 { margin:18px 0 6px; color:#e87579; font:700 .8rem Consolas, "Courier New", monospace; text-transform:uppercase; }
+    #credits-dialog p, #credits-dialog li { margin:0; font-size:.95rem; line-height:1.55; overflow-wrap:anywhere; }
+    #credits-dialog ul { margin:0; padding-left:20px; }
+    #credits-dialog a { color:#bcdce7; }
+    #credits-close { min-height:44px; margin-top:24px; padding:10px 20px; border:1px solid #c0b9b8; border-left:4px solid #d34450; background:#471522; color:#fff; font:700 1rem "Trebuchet MS", sans-serif; cursor:pointer; }
     #avatar-screen { position:fixed; inset:0; z-index:2000; display:grid; justify-items:center; align-content:safe center; overflow:auto; padding:24px; background:linear-gradient(90deg, rgba(6,9,13,.95), rgba(6,9,13,.68)), url("Images/accueil-surveillance.jpg") center / cover no-repeat; }
     #avatar-screen[hidden] { display:none; }
     .avatar-selection { width:min(1100px, 100%); }
@@ -222,6 +233,18 @@
       overflow:hidden; background:#050306; color:#f4e9ec; font-family:Consolas, "Courier New", monospace;
     }
     #intertitre.termine { display:none; }
+    #transmission-finale { position:fixed; inset:0; z-index:3500; display:grid; align-content:safe center; justify-items:center; overflow:auto; padding:24px; background:repeating-linear-gradient(0deg, rgba(235,78,91,.05) 0 1px, transparent 1px 5px), #09070c; color:#f4e9ec; }
+    #transmission-finale[hidden] { display:none; }
+    .transmission-contenu { width:min(940px, 100%); }
+    .transmission-entete { display:flex; justify-content:space-between; gap:16px; color:#e87579; font:700 .8rem/1.4 Consolas, "Courier New", monospace; }
+    .transmission-auteur { margin:28px 0 12px; color:#f0808a; font:700 1.2rem Consolas, "Courier New", monospace; }
+    .transmission-message { margin:0; max-width:860px; color:#f3eef0; font:700 1.8rem/1.45 "Trebuchet MS", sans-serif; overflow-wrap:anywhere; text-shadow:0 3px 20px #000; animation:transmissionFlotte 5s ease-in-out infinite alternate; }
+    @keyframes transmissionFlotte { from { transform:translateY(-4px); } to { transform:translateY(4px); } }
+    #transmission-suivant { min-height:52px; min-width:190px; margin-top:32px; padding:12px 24px; border:1px solid #c0b9b8; border-left:4px solid #d34450; background:#471522; color:#fff; font:700 1rem "Trebuchet MS", sans-serif; cursor:pointer; }
+    #transmission-suivant:hover { background:#8d2431; }
+    #transmission-suivant:focus-visible { outline:3px solid #e4f2f7; outline-offset:3px; }
+    @media (max-width:540px) { #transmission-finale { padding:20px; } .transmission-auteur { margin-top:20px; } .transmission-message { font-size:1.2rem; line-height:1.45; } #transmission-suivant { width:100%; margin-top:24px; } }
+    @media (prefers-reduced-motion:reduce) { .transmission-message { animation:none; } }
     #game-over { position:fixed; inset:0; z-index:4000; display:grid; place-items:center; padding:20px; background:rgba(3,4,8,.88); color:#f4e9ec; font-family:Consolas, "Courier New", monospace; }
     #game-over[hidden] { display:none; }
     .game-over-panel { width:min(440px, 100%); padding:28px; border:1px solid #a63748; border-top:4px solid #d34450; background:linear-gradient(145deg, #1a1118, #090a10); box-shadow:0 0 42px rgba(183,38,57,.28); text-align:center; }
@@ -522,8 +545,34 @@
         <button type="button" data-lang="en" aria-pressed="false">English</button>
       </div>
       <button type="button" id="start-button">Commencer</button>
+      <button type="button" id="credits-button">Crédits</button>
     </div>
   </main>
+  <dialog id="credits-dialog" aria-labelledby="credits-title">
+    <h2 id="credits-title" data-fr="Crédits" data-en="Credits">Crédits</h2>
+    <h3 data-fr="Création" data-en="Creation">Création</h3>
+    <p data-fr="Conception et création du jeu : Li Na COJAN" data-en="Game designed and created by Li Na COJAN">Conception et création du jeu : Li Na COJAN</p>
+    <p data-fr="Histoire : Li Na COJAN et Amira Adenike SAKA" data-en="Story by Li Na COJAN and Amira Adenike SAKA">Histoire : Li Na COJAN et Amira Adenike SAKA</p>
+    <h3 data-fr="Musiques et sons" data-en="Music and sound">Musiques et sons</h3>
+    <ul>
+      <li><span data-fr="Accueil : " data-en="Welcome screen: ">Accueil : </span><a href="https://pixabay.com/fr/music/belles-pi%C3%A8ces-the-slow-piano-110486/" target="_blank" rel="noopener noreferrer">The Slow Piano</a> - Music_For_Videos</li>
+      <li><span data-fr="Histoire : " data-en="Story: ">Histoire : </span><a href="https://pixabay.com/fr/music/beats-positive-chill-hop-595886/" target="_blank" rel="noopener noreferrer">Positive Chill-Hop</a> - ZephiraMusic</li>
+      <li><span data-fr="Niveaux 1 à 4 : " data-en="Levels 1 to 4: ">Niveaux 1 à 4 : </span><a href="https://pixabay.com/fr/music/titre-principal-success-351883/" target="_blank" rel="noopener noreferrer">Success</a> - ED-MusicProductions</li>
+      <li><span data-fr="Piratage et ??? : " data-en="Hacking and ???: ">Piratage et ??? : </span><a href="https://pixabay.com/fr/music/suspense-horror-background-510523/" target="_blank" rel="noopener noreferrer">Horror Background</a> - AtlasAudio</li>
+      <li><span data-fr="Bruitages : " data-en="Sound effects: ">Bruitages : </span><a href="https://www.myinstants.com/" target="_blank" rel="noopener noreferrer">Myinstants</a></li>
+    </ul>
+    <h3 data-fr="Images et vidéos" data-en="Images and videos">Images et vidéos</h3>
+    <p><span data-fr="Vidéos : " data-en="Videos: ">Vidéos : </span><a href="https://www.tiktok.com/" target="_blank" rel="noopener noreferrer">TikTok</a></p>
+    <p data-fr="Visuels d'accueil, avatars et images des niveaux transmis pour le projet." data-en="Welcome images, avatars, and level images supplied for the project.">Visuels d'accueil, avatars et images des niveaux transmis pour le projet.</p>
+    <h3 data-fr="Sources documentaires" data-en="Editorial sources">Sources documentaires</h3>
+    <ul>
+      <li><a href="https://www.france24.com/fr/france/20261019-couple-d-octog%C3%A9naires-agress%C3%A9-et-d%C3%A9nud%C3%A9-%C3%A0-paris-photos-g%C3%A9n%C3%A9r%C3%A9es-par-ia" target="_blank" rel="noopener noreferrer" data-fr="France 24 : vérification de l'image du couple" data-en="France 24: fact-check of the couple's image">France 24 : vérification de l'image du couple</a></li>
+      <li><a href="https://www.leparisien.fr/elections/presidentielle/presidentielle-2027-je-suis-candidat-pour-dire-quon-peut-relever-la-france-teddy-riner-se-lance-dans-la-competition-09-11-2026-36MFSFMWDFGATLM2YGR3MDF4QI.php" target="_blank" rel="noopener noreferrer" data-fr="Le Parisien : annonce de Teddy Riner" data-en="Le Parisien: Teddy Riner's announcement">Le Parisien : annonce de Teddy Riner</a></li>
+    </ul>
+    <h3 data-fr="Attributions" data-en="Attributions">Attributions</h3>
+    <p data-fr="Les auteurs des images et les comptes d'origine des vidéos restent à compléter." data-en="The image creators and original video accounts still need to be added.">Les auteurs des images et les comptes d'origine des vidéos restent à compléter.</p>
+    <button type="button" id="credits-close" data-fr="Fermer" data-en="Close">Fermer</button>
+  </dialog>
   <section id="avatar-screen" aria-labelledby="avatar-selection-title" hidden>
     <div class="avatar-selection">
       <p class="avatar-selection-code" id="avatar-selection-code">CANAL 07 // IDENTITÉ</p>
@@ -565,6 +614,14 @@
       <p class="intertitre-alerte" id="intertitre-alerte">ANALYSE DE DÉSINFORMATION</p>
     </div>
   </div>
+  <section id="transmission-finale" aria-labelledby="transmission-auteur" hidden>
+    <div class="transmission-contenu">
+      <div class="transmission-entete"><span id="transmission-code">CANAL 07 // MESSAGE DE 2100</span><span id="transmission-compteur"></span></div>
+      <h2 class="transmission-auteur" id="transmission-auteur">???</h2>
+      <p class="transmission-message" id="transmission-message" aria-live="polite"></p>
+      <button type="button" id="transmission-suivant">Suivant</button>
+    </div>
+  </section>
   <div id="game-over" role="dialog" aria-modal="true" aria-labelledby="game-over-title" aria-describedby="game-over-message" hidden>
     <div class="game-over-panel">
       <p class="game-over-code" id="game-over-code">SIGNAL PERDU // VIES ÉPUISÉES</p>
@@ -729,7 +786,7 @@
       "Faux. Cette vidéo ne montre pas une frappe réelle sur Arak. Les nuages très lisses, la seconde boule de feu et l'image étonnamment stable suggèrent une génération par IA ou des effets numériques.": "False. This video does not show a real strike on Arak. The unusually smooth clouds, second fireball, and remarkably stable image suggest AI generation or digital effects.",
       "Le 22 mai 2023, une image d'explosion près du Pentagone circule sur les réseaux sociaux. Des comptes la présentent comme une explosion réelle.": "On May 22, 2023, an image of an explosion near the Pentagon circulates on social media. Some accounts present it as a real explosion.",
       "Image présentée comme montrant une explosion près du Pentagone, aux États-Unis.": "Image presented as showing an explosion near the Pentagon in the United States.",
-      "Faux. Cette image générée par IA a été diffusée par des comptes certifiés, dont un faux compte usurpant Bloomberg. Sa propagation a brièvement fait chuter le S&P 500 avant que le canular soit révélé.": "False. This AI-generated image was shared by verified accounts, including a fake account impersonating Bloomberg. It briefly caused the S&P 500 to dip before the hoax was exposed.",
+      "Faux. Cette image générée par IA prétend montrer une explosion près du Pentagone. Diffusée notamment par un faux compte usurpant Bloomberg, elle a provoqué une brève panique et une légère baisse temporaire des marchés boursiers américains avant d'être démentie.": "False. This AI-generated image claims to show an explosion near the Pentagon. Shared by a fake account impersonating Bloomberg, it caused brief panic and a slight temporary fall in US stock markets before being debunked.",
       "✅ Vrai": "✅ True",
       "❌ Faux": "❌ False",
       "💡 Aide de V (": "💡 V's hint (",
@@ -789,6 +846,7 @@
         ? (anglais ? "Year 2100" : "Année 2100")
         : (anglais ? "Signal from year 2100 in " : "Signal de l'année 2100 dans ") + secondesAvant2100 + (anglais ? " seconds" : " secondes"));
       document.getElementById("start-button").textContent = anglais ? "Start" : "Commencer";
+      document.getElementById("credits-button").textContent = anglais ? "Credits" : "Crédits";
       document.querySelectorAll("#language-switch button").forEach(button => {
         button.setAttribute("aria-pressed", button.dataset.lang === langue);
       });
@@ -1000,7 +1058,7 @@
             imageAlt: "Image présentée comme montrant une explosion près du Pentagone, aux États-Unis.",
             vrai: false,
             aide: "",
-            explication: "Faux. Cette image générée par IA a été diffusée par des comptes certifiés, dont un faux compte usurpant Bloomberg. Sa propagation a brièvement fait chuter le S&P 500 avant que le canular soit révélé." }
+            explication: "Faux. Cette image générée par IA prétend montrer une explosion près du Pentagone. Diffusée notamment par un faux compte usurpant Bloomberg, elle a provoqué une brève panique et une légère baisse temporaire des marchés boursiers américains avant d'être démentie." }
         ]
       }
     ];
@@ -1016,14 +1074,68 @@
     let bAide = null;
     let vGlitchCount = 0;
     let musiqueDefaite = null;
+    let piratageActif = false;
 
     const chat = document.getElementById("chat");
     const zoneChoix = document.getElementById("choix");
     const app = document.getElementById("app");
+    const promessesAudio = new WeakMap();
+    const generationsAudio = new WeakMap();
+    const musiqueAccueil = new Audio("Sounds/opening.mp3");
+    musiqueAccueil.dataset.sourceLocale = "Sounds/opening.mp3";
+    musiqueAccueil.loop = true;
+    musiqueAccueil.volume = 0.4;
+    const musiqueHistoire = new Audio("Sounds/story-background.mp3");
+    const musiqueTutoriel = new Audio("Sounds/tutorial-background.mp3");
+    const musiqueV = new Audio("Sounds/v-speech.mp3");
+    musiqueHistoire.dataset.sourceLocale = "Sounds/story-background.mp3";
+    musiqueTutoriel.dataset.sourceLocale = "Sounds/tutorial-background.mp3";
+    musiqueV.dataset.sourceLocale = "Sounds/v-speech.mp3";
+    [musiqueHistoire, musiqueTutoriel, musiqueV].forEach(audio => {
+      audio.loop = true;
+      audio.volume = 0.3;
+    });
+    musiqueV.volume = 0.4;
     const sons = {
       perte: new Audio("Sounds/Mort.mp3"),
       niveau: new Audio("Sounds/next level.mp3")
     };
+
+    function lancerMusiqueAccueil() {
+      if (!musiqueAccueil.paused) return;
+      lancerAmbiance(musiqueAccueil);
+    }
+
+    function arreterMusiqueAccueil() {
+      arreterAmbiance(musiqueAccueil);
+    }
+
+    function lancerAmbiance(audio) {
+      if (!audio.paused) return;
+      const generation = (generationsAudio.get(audio) || 0) + 1;
+      generationsAudio.set(audio, generation);
+      audio.play().catch(error => {
+        if (generationsAudio.get(audio) !== generation || error.name !== "NotSupportedError" || !audio.dataset.sourceLocale) return;
+        let fallback = promessesAudio.get(audio);
+        if (!fallback) {
+          fallback = fetch(audio.dataset.sourceLocale)
+            .then(response => response.ok ? response.blob() : Promise.reject(new Error("Audio unavailable")))
+            .then(blob => URL.createObjectURL(blob));
+          promessesAudio.set(audio, fallback);
+        }
+        fallback.then(url => {
+          if (generationsAudio.get(audio) !== generation) return;
+          audio.src = url;
+          audio.play().catch(() => {});
+        }).catch(() => { promessesAudio.delete(audio); });
+      });
+    }
+
+    function arreterAmbiance(audio) {
+      generationsAudio.set(audio, (generationsAudio.get(audio) || 0) + 1);
+      audio.pause();
+      audio.currentTime = 0;
+    }
 
     function jouerSon(nom) {
       const son = sons[nom];
@@ -1036,6 +1148,9 @@
 
     function ouvrirEcranDefaite() {
       clearInterval(minuteur);
+      arreterAmbiance(musiqueHistoire);
+      arreterAmbiance(musiqueTutoriel);
+      arreterAmbiance(musiqueV);
       document.getElementById("timer-fond").style.visibility = "hidden";
       const ecran = document.getElementById("game-over");
       const anglais = langue === "en";
@@ -1118,6 +1233,8 @@
     }
 
     function ajouterMessage(qui, texte, extra) {
+      if (qui === "V" && piratageActif) lancerAmbiance(musiqueV);
+      else arreterAmbiance(musiqueV);
       if (qui === "narr") {
         const narr = document.createElement("div");
         narr.className = "narr";
@@ -1198,6 +1315,7 @@
     }
 
     async function intercepterPartage() {
+      piratageActif = true;
       zoneChoix.innerHTML = "";
       const ecran = document.getElementById("demarrage");
       const entete = ecran.querySelectorAll(".terminal-entete span");
@@ -1234,7 +1352,7 @@
       const estFin = type === "suite";
       const numero = niveau + 1;
       const titre = estFin
-        ? "TO BE CONTINUE"
+        ? "TO BE CONTINUED"
         : (estNiveau && niveau === 0 ? (langue === "en" ? "TUTORIAL" : "TUTORIEL") : langue === "en" ? "LEVEL " + numero : "NIVEAU " + numero);
       document.getElementById("intertitre-code").textContent = estNiveau
         ? (estNiveau && niveau === 0
@@ -1261,6 +1379,55 @@
       ecran.classList.add("termine");
     }
 
+    function afficherTransmissionFinale() {
+      const messages = langue === "en" ? [
+        "You have finished the tutorial. Now I need to tell you why I travelled through time from 2100.",
+        "In your time, you can still spot an AI-generated image or video: an extra finger, an odd shadow, a movement that looks wrong.",
+        "But in my time, those flaws disappeared long ago. If your time does not learn to recognise these dangers now, nobody will be able to tell truth from fiction. That is what happened to us.",
+        "In 2100, armies did not bring down governments. Doubt did: nobody knew what was true anymore.",
+        "It started in your time: making a fake costs almost nothing. In 2023, AI-generated presenters could be made using tools costing around $30 a month.",
+        "Governments already use disinformation today. Portal Kombat, a network of 193 fake news sites, spreads pro-Russian disinformation.",
+        "In Romania in 2024, the presidential election was annulled after concerns about a coordinated online campaign, including on TikTok. In my time, we did not get another chance.",
+        "Democracy needs facts we can share. Without them, we cannot debate, vote or decide together. Help me keep your time from falling like mine."
+      ] : [
+        "Tu viens de finir le tutoriel. Je dois maintenant te dire pourquoi j'ai traversé le temps depuis 2100.",
+        "À ton époque, on peut encore repérer une image ou une vidéo créée par IA : un doigt de trop, une ombre bizarre, un mouvement qui sonne faux.",
+        "Mais chez moi, ces défauts ont disparu depuis longtemps. Si ton époque ne se sensibilise pas maintenant, personne ne saura plus distinguer le vrai du faux. C'est ce qui nous est arrivé.",
+        "En 2100, ce ne sont pas des armées qui ont fait tomber les États. C'est le doute : plus personne ne savait ce qui était vrai.",
+        "Tout a commencé chez toi, à ton époque : fabriquer un faux ne coûte presque rien. En 2023, des outils permettant de créer des présentateurs par IA coûtaient environ 30 $ par mois.",
+        "Des États utilisent déjà la désinformation. Portal Kombat, un réseau de 193 faux sites d'information, relaie notamment des contenus pro-russes.",
+        "En Roumanie, en 2024, l'élection présidentielle a été annulée après des inquiétudes concernant une campagne en ligne coordonnée, notamment sur TikTok. Chez moi, nous n'avons pas eu cette chance.",
+        "Une démocratie a besoin de faits que tout le monde partage. Sans ça, on ne peut plus débattre, voter ou décider ensemble. Aide-moi à éviter que ton époque ne tombe comme la mienne."
+      ];
+      const ecran = document.getElementById("transmission-finale");
+      const texte = document.getElementById("transmission-message");
+      const compteur = document.getElementById("transmission-compteur");
+      const bouton = document.getElementById("transmission-suivant");
+      let index = 0;
+      document.getElementById("transmission-code").textContent = langue === "en" ? "CHANNEL 07 // MESSAGE FROM 2100" : "CANAL 07 // MESSAGE DE 2100";
+      ecran.hidden = false;
+      app.inert = true;
+      return new Promise(resolve => {
+        const afficherMessage = () => {
+          texte.textContent = messages[index];
+          compteur.textContent = (index + 1) + " / " + messages.length;
+          bouton.textContent = index === messages.length - 1 ? (langue === "en" ? "Continue" : "Continuer") : (langue === "en" ? "Next" : "Suivant");
+        };
+        bouton.onclick = () => {
+          index++;
+          if (index < messages.length) afficherMessage();
+          else {
+            bouton.onclick = null;
+            ecran.hidden = true;
+            app.inert = false;
+            resolve();
+          }
+        };
+        afficherMessage();
+        bouton.focus();
+      });
+    }
+
     // ================= 5. MOTEUR D'HISTOIRE =================
     async function afficher(id) {
       const scene = scenes[id];
@@ -1281,6 +1448,10 @@
 
     // ================= 6. MOTEUR DE NIVEAUX =================
     async function lancerNiveau(n) {
+      piratageActif = false;
+      arreterAmbiance(musiqueHistoire);
+      arreterAmbiance(musiqueV);
+      lancerAmbiance(musiqueTutoriel);
       niveauActuel = n;
       app.dataset.niveau = String(n + 1);
       app.classList.remove("erreur");
@@ -1438,6 +1609,7 @@
     }
 
     async function finNiveau() {
+      arreterAmbiance(musiqueV);
       const niveau = niveaux[niveauActuel];
       document.getElementById("timer-fond").style.visibility = "hidden";
       const total = niveau.items.length;
@@ -1455,8 +1627,10 @@
             lancerNiveau(niveauActuel + 1);
           });
         } else {
+          arreterAmbiance(musiqueTutoriel);
           ajouterMessage("V", traduire("Incroyable. Dans mon époque, il manque des gens comme toi. Retiens ça : s'arrêter 5 secondes avant de partager, c'est déjà un super-pouvoir."));
           await pause(2200);
+          await afficherTransmissionFinale();
           await afficherIntertitre("suite");
           boutonUnique(langue === "en" ? "Play again 🔁" : "Rejouer 🔁", () => location.reload());
         }
@@ -1482,6 +1656,8 @@
     }
 
     function demarrerPartie() {
+      arreterMusiqueAccueil();
+      lancerAmbiance(musiqueHistoire);
       const anglais = langue === "en";
       document.getElementById("game-title").textContent = "BECOME AWARE";
       document.getElementById("desk-label").textContent = anglais ? "WATCH // MISINFORMATION UNIT" : "VIGIE // CELLULE ANTI-INFOX";
@@ -1495,15 +1671,30 @@
 
     document.querySelectorAll("#language-switch button").forEach(button => {
       button.addEventListener("click", () => {
+        lancerMusiqueAccueil();
         langue = button.dataset.lang;
         actualiserAccueil();
       });
     });
     document.getElementById("start-button").addEventListener("click", () => {
+      lancerMusiqueAccueil();
       choisirAvatar();
+    });
+    document.getElementById("credits-button").addEventListener("click", () => {
+      lancerMusiqueAccueil();
+      const dialog = document.getElementById("credits-dialog");
+      dialog.querySelectorAll("[data-fr][data-en]").forEach(element => {
+        element.textContent = langue === "en" ? element.dataset.en : element.dataset.fr;
+      });
+      dialog.showModal();
+      document.getElementById("credits-close").focus();
+    });
+    document.getElementById("credits-close").addEventListener("click", () => {
+      document.getElementById("credits-dialog").close();
     });
     document.querySelectorAll(".avatar-option").forEach(button => {
       button.addEventListener("click", () => {
+        lancerMusiqueAccueil();
         avatarJoueur = button.dataset.avatar;
         document.querySelectorAll(".avatar-option").forEach(option => {
           option.setAttribute("aria-pressed", option === button);
@@ -1522,6 +1713,7 @@
       naviguerAuDebut(false);
     });
     actualiserAccueil();
+    lancerMusiqueAccueil();
     if (new URLSearchParams(location.search).get("start") === "1") choisirAvatar();
     else lancerCompteARebours();
   </script>
