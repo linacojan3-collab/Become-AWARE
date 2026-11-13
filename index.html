@@ -144,6 +144,20 @@
     #language-switch button[aria-pressed="true"] { background:#8d2431; }
     #start-button { margin:0; width:220px; border:1px solid #c0b9b8; border-left:4px solid #d34450; border-radius:2px; background:rgba(71,13,24,.88); box-shadow:none; text-align:left; text-transform:uppercase; }
     #start-button:hover { background:#a52e3d; transform:translateX(4px); box-shadow:none; }
+    #avatar-screen { position:fixed; inset:0; z-index:2000; display:grid; justify-items:center; align-content:safe center; overflow:auto; padding:24px; background:linear-gradient(90deg, rgba(6,9,13,.95), rgba(6,9,13,.68)), url("Images/accueil-surveillance.jpg") center / cover no-repeat; }
+    #avatar-screen[hidden] { display:none; }
+    .avatar-selection { width:min(1100px, 100%); }
+    .avatar-selection-code { margin:0 0 12px; color:#e87579; font:700 .72rem Consolas, "Courier New", monospace; }
+    .avatar-selection h2 { margin:0 0 20px; color:#e4f2f7; font:800 2rem/1.1 "Segoe UI", "Trebuchet MS", sans-serif; }
+    .avatar-options { display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); gap:10px; }
+    .avatar-option { position:relative; min-width:0; padding:3px; border:2px solid #6c555c; background:#141217; cursor:pointer; }
+    .avatar-option[aria-pressed="true"] { border-color:#ef6772; box-shadow:0 0 0 2px #8d2431; }
+    .avatar-option:focus-visible { outline:3px solid #e4f2f7; outline-offset:3px; }
+    .avatar-option img { display:block; width:100%; aspect-ratio:1; object-fit:cover; }
+    #avatar-confirm { display:block; width:min(400px, 100%); min-height:64px; margin:30px auto 0; padding:16px 24px; border:1px solid #c0b9b8; border-left:4px solid #d34450; background:rgba(71,13,24,.92); color:#fff6f1; font:700 1.1rem "Trebuchet MS", sans-serif; text-align:center; text-transform:uppercase; cursor:pointer; }
+    #avatar-confirm:hover { background:#a52e3d; }
+    #avatar-confirm:focus-visible { outline:3px solid #e4f2f7; outline-offset:3px; }
+    @media (max-width:540px) { #avatar-screen { padding:18px; } .avatar-options { grid-template-columns:repeat(2, minmax(0, 1fr)); } .avatar-selection h2 { font-size:1.6rem; } }
     @media (min-width:721px) {
       .signal-message:nth-child(1) { left:55%; top:4%; }
       .signal-message:nth-child(2) { right:3%; top:14%; }
@@ -510,6 +524,20 @@
       <button type="button" id="start-button">Commencer</button>
     </div>
   </main>
+  <section id="avatar-screen" aria-labelledby="avatar-selection-title" hidden>
+    <div class="avatar-selection">
+      <p class="avatar-selection-code" id="avatar-selection-code">CANAL 07 // IDENTITÉ</p>
+      <h2 id="avatar-selection-title">Choisis ton avatar</h2>
+      <div class="avatar-options" role="group" aria-label="Choix de l'avatar">
+        <button type="button" class="avatar-option" data-avatar="Images/player-avatar.jpg" aria-label="Avatar 1" aria-pressed="true"><img src="Images/player-avatar.jpg" alt=""></button>
+        <button type="button" class="avatar-option" data-avatar="Images/player-avatar-2.jpg" aria-label="Avatar 2" aria-pressed="false"><img src="Images/player-avatar-2.jpg" alt=""></button>
+        <button type="button" class="avatar-option" data-avatar="Images/player-avatar-3.jpg" aria-label="Avatar 3" aria-pressed="false"><img src="Images/player-avatar-3.jpg" alt=""></button>
+        <button type="button" class="avatar-option" data-avatar="Images/player-avatar-4.jpg" aria-label="Avatar 4" aria-pressed="false"><img src="Images/player-avatar-4.jpg" alt=""></button>
+        <button type="button" class="avatar-option" data-avatar="Images/player-avatar-5.jpg" aria-label="Avatar 5" aria-pressed="false"><img src="Images/player-avatar-5.jpg" alt=""></button>
+      </div>
+      <button type="button" id="avatar-confirm">Continuer</button>
+    </div>
+  </section>
   <div id="demarrage" class="termine" role="status" aria-live="polite" aria-label="Interception du partage">
     <div class="terminal">
       <div class="terminal-entete"><span>CANAL 07 // PARTAGE</span><span class="terminal-signal">SIGNAL INTERCEPTÉ</span></div>
@@ -576,6 +604,7 @@
 
   <script>
     let langue = new URLSearchParams(location.search).get("lang") === "en" ? "en" : "fr";
+    let avatarJoueur = "Images/player-avatar.jpg";
     const traductionsEN = {
       "Le Learning Center": "The Learning Center",
       "Vidéo du post": "Post video",
@@ -643,7 +672,7 @@
       "Niveau 2 : Les imitations": "Level 2: The Impersonators",
       "🥈 Éclaireur": "🥈 Scout",
       "Pas mal ! Mais les vrais manipulateurs sont plus malins que ça.": "Not bad! But real manipulators are much more subtle.",
-      "Maintenant : 40 secondes par post, et je ne peux t'aider que 2 fois.": "Now you have 40 seconds per post, and I can only help twice.",
+      "Maintenant, prends le temps de vérifier chaque post. Je ne peux t'aider que 2 fois.": "Now take your time to check each post. I can only help twice.",
       "VIDÉO INCROYABLE : des lapins font du trampoline dans la bibliothèque ! 😱": "UNBELIEVABLE VIDEO: rabbits are bouncing on a trampoline in the library! 😱",
       "Vidéo de lapins qui sautent sur un trampoline.": "Video of rabbits jumping on a trampoline.",
       "Observe bien les lapins : leurs mouvements, leurs contours et leurs ombres. Un détail peut trahir une vidéo truquée.": "Watch the rabbits closely: their movement, outlines, and shadows. A small detail can reveal a manipulated video.",
@@ -666,7 +695,7 @@
       "Niveau 3 : Les faux crédibles": "Level 3: Convincing Fakes",
       "🥇 Détective": "🥇 Detective",
       "Là, ça se corse : les faux semblent sérieux, et certains vrais semblent incroyables.": "Now it gets tricky: some fakes look convincing, and some true stories sound unbelievable.",
-      "25 secondes par post. Une seule aide.": "25 seconds per post. One hint only.",
+      "Prends le temps d'analyser chaque post. Une seule aide.": "Take your time to analyze each post. One hint only.",
       "Une fillette en larmes serre son chiot sur une barque après le passage de l'ouragan Helene aux États-Unis.": "A tearful little girl clutches her puppy in a boat after Hurricane Helene in the United States.",
       "Image présentée comme une photo d'une fillette en larmes tenant son chiot sur une barque après l'ouragan Helene.": "Image presented as a photo of a tearful girl holding her puppy in a boat after Hurricane Helene.",
       "Observe les détails : les doigts se confondent avec les poils du chiot, la peau, les larmes et le gilet paraissent très lisses, et l'arrière-plan est flou comme une peinture numérique.": "Look closely: the fingers blend into the puppy's fur, the skin, tears, and life jacket look unusually smooth, and the background is blurred like a digital painting.",
@@ -691,13 +720,16 @@
       "Niveau 4 : L'épreuve finale": "Level 4: The Final Test",
       "👑 Maître de l'esprit critique": "👑 Critical Thinking Master",
       "Dernier niveau. Je ne peux plus t'aider : je dois te faire confiance.": "Final level. I can't help you anymore: I have to trust you.",
-      "15 secondes par post. Le vrai et le faux se ressemblent.": "15 seconds per post. Truth and lies can look alike.",
-      "Les pieuvres ont trois cœurs.": "Octopuses have three hearts.",
-      "Vrai. Deux cœurs pour les branchies, un pour le reste du corps. Un fait absurde peut être exact.": "True. Two hearts pump blood to the gills, and one to the rest of the body. An odd fact can still be true.",
-      "COMMUNIQUÉ : suite à un incident technique, les examens de janvier sont annulés. Les notes seront calculées sur le contrôle continu.": "NOTICE: due to a technical issue, January exams are cancelled. Grades will be based on coursework.",
-      "Faux. Regarde le nom du compte : un zéro à la place du « O ». Un faux compte qui imite l'officiel.": "False. Look at the account name: it uses a zero instead of the letter O. It's impersonating the official account.",
-      "Botaniquement, une banane est une baie, mais pas une fraise.": "Botanically, a banana is a berry, but a strawberry isn't.",
-      "Vrai. Définition botanique des baies : la banane en est une, la fraise non. Contre-intuitif, mais exact.": "True. Botanically, bananas are berries, but strawberries aren't. Counterintuitive, but correct.",
+      "Le vrai et le faux se ressemblent : prends le temps de vérifier chaque post.": "Truth and lies can look alike, so take your time to check each post.",
+      "Un chat roux assis sur le siège passager d'une voiture ouvre la portière en pleine rue. Une voiture passe tout près ; le chat manque de tomber avant que le passager ne referme la portière.": "A ginger cat sitting in a car's passenger seat opens the door on a busy street. Another car passes close by; the cat nearly falls out before the passenger closes the door.",
+      "Vidéo d'un chat roux sur le siège passager qui ouvre la portière d'une voiture en circulation.": "Video of a ginger cat in the passenger seat opening the door of a moving car.",
+      "Faux. Cette vidéo a été générée par intelligence artificielle : la scène du chat ouvrant la portière en pleine circulation n'est pas réelle.": "False. This video was AI-generated: the scene of a cat opening the door in traffic is not real.",
+      "Une vidéo nocturne montre une immense explosion en forme de champignon au-dessus d'une zone urbaine. Des comptes la présentent comme une frappe américaine contre le site nucléaire d'Arak.": "A nighttime video shows a huge mushroom-shaped explosion above an urban area. Some accounts present it as a US strike on the Arak nuclear site.",
+      "Vidéo nocturne d'une immense explosion en forme de champignon au-dessus d'une zone urbaine.": "Nighttime video of a huge mushroom-shaped explosion above an urban area.",
+      "Faux. Cette vidéo ne montre pas une frappe réelle sur Arak. Les nuages très lisses, la seconde boule de feu et l'image étonnamment stable suggèrent une génération par IA ou des effets numériques.": "False. This video does not show a real strike on Arak. The unusually smooth clouds, second fireball, and remarkably stable image suggest AI generation or digital effects.",
+      "Le 22 mai 2023, une image d'explosion près du Pentagone circule sur les réseaux sociaux. Des comptes la présentent comme une explosion réelle.": "On May 22, 2023, an image of an explosion near the Pentagon circulates on social media. Some accounts present it as a real explosion.",
+      "Image présentée comme montrant une explosion près du Pentagone, aux États-Unis.": "Image presented as showing an explosion near the Pentagon in the United States.",
+      "Faux. Cette image générée par IA a été diffusée par des comptes certifiés, dont un faux compte usurpant Bloomberg. Sa propagation a brièvement fait chuter le S&P 500 avant que le canular soit révélé.": "False. This AI-generated image was shared by verified accounts, including a fake account impersonating Bloomberg. It briefly caused the S&P 500 to dip before the hoax was exposed.",
       "✅ Vrai": "✅ True",
       "❌ Faux": "❌ False",
       "💡 Aide de V (": "💡 V's hint (",
@@ -882,10 +914,10 @@
         ]
       },
       {
-        nom: "Niveau 2 : Les imitations", badge: "🥈 Éclaireur", aides: 2, temps: 40,
+        nom: "Niveau 2 : Les imitations", badge: "🥈 Éclaireur", aides: 2, temps: 0,
         intro: [
           "Pas mal ! Mais les vrais manipulateurs sont plus malins que ça.",
-          "Maintenant : 40 secondes par post, et je ne peux t'aider que 2 fois."
+          "Maintenant, prends le temps de vérifier chaque post. Je ne peux t'aider que 2 fois."
         ],
         items: [
           { auteur: "@campus_buzz",
@@ -912,10 +944,10 @@
         ]
       },
       {
-        nom: "Niveau 3 : Les faux crédibles", badge: "🥇 Détective", aides: 1, temps: 25,
+        nom: "Niveau 3 : Les faux crédibles", badge: "🥇 Détective", aides: 1, temps: 0,
         intro: [
           "Là, ça se corse : les faux semblent sérieux, et certains vrais semblent incroyables.",
-          "25 secondes par post. Une seule aide."
+          "Prends le temps d'analyser chaque post. Une seule aide."
         ],
         items: [
           { auteur: "@images_du_jour",
@@ -942,27 +974,33 @@
         ]
       },
       {
-        nom: "Niveau 4 : L'épreuve finale", badge: "👑 Maître de l'esprit critique", aides: 0, temps: 15,
+        nom: "Niveau 4 : L'épreuve finale", badge: "👑 Maître de l'esprit critique", aides: 0, temps: 0,
         intro: [
           "Dernier niveau. Je ne peux plus t'aider : je dois te faire confiance.",
-          "15 secondes par post. Le vrai et le faux se ressemblent."
+          "Le vrai et le faux se ressemblent : prends le temps de vérifier chaque post."
         ],
         items: [
-          { auteur: "@savoirs_insolites",
-            texte: "Les pieuvres ont trois cœurs.",
-            vrai: true,
-            aide: "",
-            explication: "Vrai. Deux cœurs pour les branchies, un pour le reste du corps. Un fait absurde peut être exact." },
-          { auteur: "@RSB_0fficiel ✔",
-            texte: "COMMUNIQUÉ : suite à un incident technique, les examens de janvier sont annulés. Les notes seront calculées sur le contrôle continu.",
+          { auteur: "@animaux_en_video",
+            texte: "Un chat roux assis sur le siège passager d'une voiture ouvre la portière en pleine rue. Une voiture passe tout près ; le chat manque de tomber avant que le passager ne referme la portière.",
+            video: "Videos/4a.mp4",
+            videoAlt: "Vidéo d'un chat roux sur le siège passager qui ouvre la portière d'une voiture en circulation.",
             vrai: false,
             aide: "",
-            explication: "Faux. Regarde le nom du compte : un zéro à la place du « O ». Un faux compte qui imite l'officiel." },
-          { auteur: "@botanique_facile",
-            texte: "Botaniquement, une banane est une baie, mais pas une fraise.",
-            vrai: true,
+            explication: "Faux. Cette vidéo a été générée par intelligence artificielle : la scène du chat ouvrant la portière en pleine circulation n'est pas réelle." },
+          { auteur: "@veille_internationale",
+            texte: "Une vidéo nocturne montre une immense explosion en forme de champignon au-dessus d'une zone urbaine. Des comptes la présentent comme une frappe américaine contre le site nucléaire d'Arak.",
+            video: "Videos/4b.mp4",
+            videoAlt: "Vidéo nocturne d'une immense explosion en forme de champignon au-dessus d'une zone urbaine.",
+            vrai: false,
             aide: "",
-            explication: "Vrai. Définition botanique des baies : la banane en est une, la fraise non. Contre-intuitif, mais exact." }
+            explication: "Faux. Cette vidéo ne montre pas une frappe réelle sur Arak. Les nuages très lisses, la seconde boule de feu et l'image étonnamment stable suggèrent une génération par IA ou des effets numériques." },
+          { auteur: "@alerte_usa",
+            texte: "Le 22 mai 2023, une image d'explosion près du Pentagone circule sur les réseaux sociaux. Des comptes la présentent comme une explosion réelle.",
+            imageSrc: "Images/4c.jpg",
+            imageAlt: "Image présentée comme montrant une explosion près du Pentagone, aux États-Unis.",
+            vrai: false,
+            aide: "",
+            explication: "Faux. Cette image générée par IA a été diffusée par des comptes certifiés, dont un faux compte usurpant Bloomberg. Sa propagation a brièvement fait chuter le S&P 500 avant que le canular soit révélé." }
         ]
       }
     ];
@@ -1131,7 +1169,7 @@
         if (qui === "V") avatar.textContent = "???";
         else {
           const photo = document.createElement("img");
-          photo.src = "Images/player-avatar.jpg";
+          photo.src = avatarJoueur;
           photo.alt = langue === "en" ? "Protagonist avatar" : "Avatar du protagoniste";
           avatar.appendChild(photo);
         }
@@ -1431,15 +1469,26 @@
     }
 
     // ================= 7. ON LANCE LE JEU =================
-    function demarrerPartie() {
+    function choisirAvatar() {
       clearInterval(intervalleCompteRebours);
+      document.getElementById("welcome-screen").remove();
+      const anglais = langue === "en";
+      document.getElementById("avatar-selection-code").textContent = anglais ? "CHANNEL 07 // IDENTITY" : "CANAL 07 // IDENTITÉ";
+      document.getElementById("avatar-selection-title").textContent = anglais ? "Choose your avatar" : "Choisis ton avatar";
+      document.querySelector(".avatar-options").setAttribute("aria-label", anglais ? "Choose an avatar" : "Choix de l'avatar");
+      document.getElementById("avatar-confirm").textContent = anglais ? "Continue" : "Continuer";
+      document.getElementById("avatar-screen").hidden = false;
+      document.querySelector('.avatar-option[aria-pressed="true"]').focus();
+    }
+
+    function demarrerPartie() {
       const anglais = langue === "en";
       document.getElementById("game-title").textContent = "BECOME AWARE";
       document.getElementById("desk-label").textContent = anglais ? "WATCH // MISINFORMATION UNIT" : "VIGIE // CELLULE ANTI-INFOX";
       document.getElementById("network-label").textContent = anglais ? "NETWORK COMPROMISED" : "RÉSEAU COMPROMIS";
       document.getElementById("critique-label").textContent = anglais ? "Critical thinking:" : "Esprit critique :";
       actualiserProgression();
-      document.getElementById("welcome-screen").remove();
+      document.getElementById("avatar-screen").hidden = true;
       app.classList.add("app-active");
       afficher("learning");
     }
@@ -1451,8 +1500,17 @@
       });
     });
     document.getElementById("start-button").addEventListener("click", () => {
-      demarrerPartie();
+      choisirAvatar();
     });
+    document.querySelectorAll(".avatar-option").forEach(button => {
+      button.addEventListener("click", () => {
+        avatarJoueur = button.dataset.avatar;
+        document.querySelectorAll(".avatar-option").forEach(option => {
+          option.setAttribute("aria-pressed", option === button);
+        });
+      });
+    });
+    document.getElementById("avatar-confirm").addEventListener("click", demarrerPartie);
     document.getElementById("retry-level-button").addEventListener("click", () => {
       fermerEcranDefaite();
       lancerNiveau(niveauActuel);
@@ -1464,7 +1522,7 @@
       naviguerAuDebut(false);
     });
     actualiserAccueil();
-    if (new URLSearchParams(location.search).get("start") === "1") demarrerPartie();
+    if (new URLSearchParams(location.search).get("start") === "1") choisirAvatar();
     else lancerCompteARebours();
   </script>
 </body>
