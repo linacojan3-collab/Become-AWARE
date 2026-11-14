@@ -1631,6 +1631,7 @@
           await afficherTransmissionFinale();
           await afficherIntertitre("suite");
           boutonUnique(langue === "en" ? "Play again 🔁" : "Rejouer 🔁", () => location.reload());
+          zoneChoix.appendChild(creerBouton(langue === "en" ? "Return to the title screen" : "Retour à l'accueil", () => naviguerAuDebut(false)));
         }
       } else {
         ajouterMessage("V", langue === "en"
